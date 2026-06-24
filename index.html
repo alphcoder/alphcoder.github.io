@@ -1,173 +1,207 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>alphcoder — fullstack developer</title>
-<meta name="description" content="Fullstack developer specializing in AI integrations, Chrome extensions, and backend systems.">
-<meta property="og:title" content="alphcoder — fullstack developer">
-<meta property="og:image" content="https://alphcoder.github.io/assets/og.png">
+<title>alphcoder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#08080f;--surface:#0e0e1a;--border:#1a1a2e;--text:#e4e4ed;--muted:#6b6b80;--accent:#6366f1;--red:#e94560;--green:#10b981;--amber:#f59e0b;--purple:#8b5cf6}
-body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,-apple-system,sans-serif;line-height:1.7;overflow-x:hidden}
-a{color:var(--accent);text-decoration:none;transition:opacity .2s}
-a:hover{opacity:.8}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050508;--surface:#0a0a12;--card:#0e0e18;--border:rgba(255,255,255,.06);--text:#e8e8f0;--dim:#555568;--accent:#7c3aed;--accent2:#a78bfa;--glow:rgba(124,58,237,.08)}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--accent);color:#fff}
 
-.grid-bg{position:fixed;inset:0;z-index:-1;background-image:linear-gradient(var(--border) 1px,transparent 1px),linear-gradient(90deg,var(--border) 1px,transparent 1px);background-size:80px 80px;opacity:.3}
+.noise{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.03;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-.container{max-width:1100px;margin:0 auto;padding:0 2rem}
+.container{max-width:1000px;margin:0 auto;padding:0 2rem}
 
-header{padding:6rem 0 4rem;border-bottom:1px solid var(--border)}
-header .tag{display:inline-block;font-family:'Consolas',monospace;font-size:.75rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem}
-header h1{font-size:3.5rem;font-weight:700;letter-spacing:-.02em;line-height:1.1;margin-bottom:1rem}
-header h1 span{color:var(--accent)}
-header p{font-size:1.1rem;color:var(--muted);max-width:600px;line-height:1.8}
+/* INTRO */
+.intro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-bottom:4rem}
+.intro .mono{font-family:'Consolas',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.25em;text-transform:uppercase;margin-bottom:2rem}
+.intro h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:300;letter-spacing:-.03em;line-height:1.15;margin-bottom:2rem}
+.intro h1 strong{font-weight:700}
+.intro h1 em{font-style:normal;color:var(--accent2)}
+.intro .desc{font-size:1rem;color:var(--dim);max-width:480px;line-height:2;margin-bottom:3rem}
+.intro .links{display:flex;gap:1.5rem}
+.intro .links a{font-family:'Consolas',monospace;font-size:.75rem;color:var(--dim);letter-spacing:.1em;padding:.6rem 0;border-bottom:1px solid var(--border);transition:all .4s}
+.intro .links a:hover{color:var(--text);border-color:var(--accent)}
 
-.links{display:flex;gap:1.5rem;margin-top:2rem}
-.links a{font-family:'Consolas',monospace;font-size:.85rem;color:var(--muted);border:1px solid var(--border);padding:.5rem 1.2rem;border-radius:4px;transition:all .3s}
-.links a:hover{color:var(--text);border-color:var(--accent)}
+.divider{width:40px;height:1px;background:var(--border);margin:6rem 0}
 
-section{padding:4rem 0}
-section h2{font-family:'Consolas',monospace;font-size:.8rem;color:var(--accent);letter-spacing:.2em;text-transform:uppercase;margin-bottom:3rem}
+/* SECTION */
+.section{padding:2rem 0 6rem}
+.section .label{font-family:'Consolas',monospace;font-size:.65rem;color:var(--dim);letter-spacing:.3em;text-transform:uppercase;margin-bottom:3rem}
 
-.projects{display:grid;gap:2rem}
-.project{background:var(--surface);border:1px solid var(--border);border-radius:8px;overflow:hidden;transition:border-color .3s,transform .3s}
-.project:hover{border-color:var(--accent);transform:translateY(-2px)}
-.project img{width:100%;height:auto;display:block;border-bottom:1px solid var(--border)}
-.project-info{padding:1.5rem 2rem 2rem}
-.project-info h3{font-size:1.3rem;font-weight:600;margin-bottom:.5rem}
-.project-info p{color:var(--muted);font-size:.9rem;margin-bottom:1rem;line-height:1.6}
-.tags{display:flex;flex-wrap:wrap;gap:.5rem}
-.tags span{font-family:'Consolas',monospace;font-size:.7rem;color:var(--accent);background:rgba(99,102,241,.1);padding:.25rem .6rem;border-radius:3px;letter-spacing:.03em}
+/* PROJECT CARDS */
+.projects{display:flex;flex-direction:column;gap:4rem}
+.project{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;opacity:0;transform:translateY(30px);animation:fadeUp .8s ease forwards}
+.project:nth-child(2){animation-delay:.15s}
+.project:nth-child(3){animation-delay:.3s}
+.project:nth-child(4){animation-delay:.45s}
+.project:nth-child(5){animation-delay:.6s}
+.project:nth-child(6){animation-delay:.75s}
+.project:nth-child(7){animation-delay:.9s}
+.project:nth-child(even){direction:rtl}
+.project:nth-child(even) > *{direction:ltr}
+@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
 
-.stack{padding:4rem 0;border-top:1px solid var(--border)}
-.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:1rem}
-.stack-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:1rem 1.2rem;font-family:'Consolas',monospace;font-size:.85rem;color:var(--muted);transition:color .3s}
-.stack-item:hover{color:var(--text)}
-.stack-item .label{display:block;font-size:.65rem;color:var(--accent);letter-spacing:.1em;text-transform:uppercase;margin-bottom:.3rem}
+.project .visual{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);aspect-ratio:16/10}
+.project .visual img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
+.project:hover .visual img{transform:scale(1.03)}
+.project .visual::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--glow),transparent);pointer-events:none}
 
-footer{border-top:1px solid var(--border);padding:3rem 0;text-align:center}
-footer p{font-family:'Consolas',monospace;font-size:.8rem;color:var(--muted)}
+.project .info{}
+.project .info .cat{font-family:'Consolas',monospace;font-size:.6rem;color:var(--accent2);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.8rem}
+.project .info h3{font-size:1.4rem;font-weight:600;letter-spacing:-.01em;margin-bottom:.6rem}
+.project .info p{font-size:.85rem;color:var(--dim);line-height:1.9;margin-bottom:1.2rem}
+.project .info .tags{display:flex;flex-wrap:wrap;gap:.4rem}
+.project .info .tags span{font-family:'Consolas',monospace;font-size:.6rem;color:var(--dim);background:rgba(255,255,255,.04);padding:.25rem .55rem;border-radius:3px;letter-spacing:.03em;border:1px solid var(--border)}
+.project .info .link{display:inline-block;font-family:'Consolas',monospace;font-size:.7rem;color:var(--accent2);letter-spacing:.1em;margin-top:1rem;border-bottom:1px solid transparent;transition:border-color .3s}
+.project .info .link:hover{border-color:var(--accent2)}
+
+/* STACK */
+.stack-section{padding:4rem 0 6rem}
+.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
+.stack-item{background:var(--surface);padding:1.5rem}
+.stack-item .lbl{font-family:'Consolas',monospace;font-size:.55rem;color:var(--accent2);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
+.stack-item .val{font-size:.85rem;color:var(--dim);line-height:1.6}
+
+/* FOOTER */
+footer{border-top:1px solid var(--border);padding:4rem 0;text-align:center}
+footer p{font-family:'Consolas',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.15em}
 
 @media(max-width:768px){
-header h1{font-size:2.2rem}
-.container{padding:0 1.2rem}
-header{padding:4rem 0 3rem}
+.project{grid-template-columns:1fr;gap:1.5rem}
+.project:nth-child(even){direction:ltr}
+.intro h1{font-size:2rem}
+.stack-grid{grid-template-columns:1fr 1fr}
 }
 </style>
 </head>
 <body>
-<div class="grid-bg"></div>
+<div class="noise"></div>
 
 <div class="container">
-<header>
-<span class="tag">fullstack developer</span>
-<h1>alph<span>coder</span></h1>
-<p>Building backends, AI integrations, Chrome extensions, and automation systems. Clean architecture, real products, fast delivery.</p>
+
+<section class="intro">
+<div class="mono">fullstack-разработчик</div>
+<h1><strong>Бэкенды.</strong> <em>AI.</em><br><strong>Расширения.</strong> Автоматизации.</h1>
+<p class="desc">Проектирую архитектуру, интегрирую нейросети, строю продукты от идеи до деплоя. Чистый код, быстрая доставка.</p>
 <div class="links">
 <a href="https://github.com/alphcoder">github</a>
-<a href="mailto:alphcoder@users.noreply.github.com">contact</a>
+<a href="mailto:alphcoder@users.noreply.github.com">связаться</a>
 </div>
-</header>
+</section>
 
-<section>
-<h2>projects</h2>
+<div class="divider"></div>
+
+<section class="section">
+<div class="label">проекты</div>
 <div class="projects">
 
 <a href="https://github.com/alphcoder/ai-code-review-bot" class="project">
-<img src="assets/ai-code-review-bot.png" alt="AI Code Review Bot">
-<div class="project-info">
+<div class="visual"><img src="assets/ai-code-review-bot.png" alt="AI Code Review Bot"></div>
+<div class="info">
+<div class="cat">ai / devtools</div>
 <h3>AI Code Review Bot</h3>
-<p>GitHub App that automatically reviews PRs using GPT-4o-mini. Parses diffs, detects bugs and security issues, posts inline comments with severity scoring.</p>
+<p>GitHub App для автоматического ревью пулл-реквестов. Парсит diff, находит баги и уязвимости, оставляет inline-комментарии с оценкой качества кода.</p>
 <div class="tags"><span>FastAPI</span><span>OpenAI</span><span>GitHub API</span><span>SQLAlchemy</span><span>Docker</span></div>
+<span class="link">github &#8594;</span>
 </div>
 </a>
 
 <a href="https://github.com/alphcoder/ai-knowledge-hub" class="project">
-<img src="assets/ai-knowledge-hub.png" alt="AI Knowledge Hub">
-<div class="project-info">
+<div class="visual"><img src="assets/ai-knowledge-hub.png" alt="AI Knowledge Hub"></div>
+<div class="info">
+<div class="cat">ai / rag</div>
 <h3>AI Knowledge Hub</h3>
-<p>RAG-powered document Q&A. Upload files, chunk and embed with OpenAI, semantic search via ChromaDB, answers with source citations.</p>
+<p>RAG-система для Q&A по документам. Загрузка файлов, рекурсивный чанкинг, векторные embeddings, семантический поиск, ответы с цитированием источников.</p>
 <div class="tags"><span>FastAPI</span><span>ChromaDB</span><span>OpenAI</span><span>React</span><span>Docker</span></div>
+<span class="link">github &#8594;</span>
 </div>
 </a>
 
 <a href="https://github.com/alphcoder/llm-gateway" class="project">
-<img src="assets/llm-gateway.png" alt="LLM Gateway">
-<div class="project-info">
+<div class="visual"><img src="assets/llm-gateway.png" alt="LLM Gateway"></div>
+<div class="info">
+<div class="cat">ai / backend</div>
 <h3>LLM Gateway</h3>
-<p>Unified API gateway with Strategy pattern. Route requests between OpenAI, Anthropic, and YandexGPT without changing client code.</p>
+<p>Унифицированный API-шлюз для LLM-провайдеров. Strategy-паттерн, горячее переключение между OpenAI, Anthropic, YandexGPT без изменения клиентского кода.</p>
 <div class="tags"><span>FastAPI</span><span>OpenAI</span><span>Anthropic</span><span>YandexGPT</span></div>
-</div>
-</a>
-
-<a href="https://github.com/alphcoder/wb-ai-responder" class="project">
-<img src="assets/wb-ai-responder.png" alt="WB AI Responder">
-<div class="project-info">
-<h3>WB AI Responder</h3>
-<p>Chrome extension for Wildberries Partners. Reads review data, generates seller responses via GPT-4o-mini with tone matching.</p>
-<div class="tags"><span>Chrome Extension</span><span>Express</span><span>OpenAI</span><span>Manifest V3</span></div>
+<span class="link">github &#8594;</span>
 </div>
 </a>
 
 <a href="https://github.com/alphcoder/sales-dashboard" class="project">
-<img src="assets/sales-dashboard.png" alt="Sales Dashboard">
-<div class="project-info">
+<div class="visual"><img src="assets/sales-dashboard.png" alt="Sales Dashboard"></div>
+<div class="info">
+<div class="cat">fullstack</div>
 <h3>Sales Dashboard</h3>
-<p>Fullstack analytics platform. Product catalog, order management, revenue analytics with charts and filters.</p>
+<p>Аналитическая панель. Каталог товаров, управление заказами, модуль аналитики с графиками и фильтрацией данных.</p>
 <div class="tags"><span>NestJS</span><span>TypeORM</span><span>PostgreSQL</span><span>Nuxt 3</span><span>Chart.js</span></div>
+<span class="link">github &#8594;</span>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/ai-support-bot" class="project">
-<img src="assets/ai-support-bot.png" alt="AI Support Bot">
-<div class="project-info">
-<h3>AI Support Bot</h3>
-<p>Telegram bot with OpenAI-powered responses, conversation history, and n8n webhook integration for business automation.</p>
-<div class="tags"><span>aiogram</span><span>OpenAI</span><span>SQLite</span><span>n8n</span></div>
-</div>
-</a>
-
-<a href="https://github.com/alphcoder/business-starter-kit" class="project">
-<img src="assets/business-starter-kit.png" alt="Business Starter Kit">
-<div class="project-info">
-<h3>Business Starter Kit</h3>
-<p>Next.js starter with AmoCRM, YooKassa payment, and Telegram integrations. Ready for SaaS and landing pages.</p>
-<div class="tags"><span>Next.js</span><span>React</span><span>AmoCRM</span><span>YooKassa</span></div>
+<a href="https://github.com/alphcoder/starter-landing" class="project">
+<div class="visual"><img src="assets/starter-landing.png" alt="Vortex Landing"></div>
+<div class="info">
+<div class="cat">frontend / landing</div>
+<h3>Vortex Landing</h3>
+<p>Маркетинговый лендинг SaaS-продукта. Тёмный UI, секции с метриками, дашборд-мокап, тарифы, отзывы. Чистый HTML/CSS, без фреймворков.</p>
+<div class="tags"><span>HTML</span><span>CSS</span><span>Landing</span><span>SaaS</span><span>Dark UI</span></div>
+<span class="link">github &#8594;</span>
 </div>
 </a>
 
 <a href="https://github.com/alphcoder/web-scraper-pipeline" class="project">
-<img src="assets/web-scraper-pipeline.png" alt="Web Scraper Pipeline">
-<div class="project-info">
+<div class="visual"><img src="assets/web-scraper-pipeline.png" alt="Web Scraper Pipeline"></div>
+<div class="info">
+<div class="cat">backend / data</div>
 <h3>Web Scraper Pipeline</h3>
-<p>Async scraping with Playwright, task queue via Celery/Redis, MongoDB storage. FastAPI orchestration layer.</p>
+<p>Асинхронный скрапинг с очередью задач. Playwright для рендеринга, Celery/Redis для оркестрации, MongoDB для хранения.</p>
 <div class="tags"><span>FastAPI</span><span>Playwright</span><span>MongoDB</span><span>Celery</span><span>Redis</span></div>
+<span class="link">github &#8594;</span>
+</div>
+</a>
+
+<a href="https://github.com/alphcoder/business-starter-kit" class="project">
+<div class="visual"><img src="assets/business-starter-kit.png" alt="Business Starter Kit"></div>
+<div class="info">
+<div class="cat">fullstack / integrations</div>
+<h3>Business Starter Kit</h3>
+<p>Next.js стартер с интеграциями для бизнеса. AmoCRM для лидов, YooKassa для платежей, Telegram для уведомлений.</p>
+<div class="tags"><span>Next.js</span><span>React</span><span>AmoCRM</span><span>YooKassa</span><span>Telegram</span></div>
+<span class="link">github &#8594;</span>
 </div>
 </a>
 
 </div>
 </section>
 
-<section class="stack">
-<h2>stack</h2>
+<div class="divider"></div>
+
+<section class="stack-section">
+<div class="label">стек</div>
 <div class="stack-grid">
-<div class="stack-item"><span class="label">frontend</span>React / Next.js / Vue / Nuxt</div>
-<div class="stack-item"><span class="label">backend</span>FastAPI / Express / NestJS</div>
-<div class="stack-item"><span class="label">database</span>PostgreSQL / MongoDB / SQLite</div>
-<div class="stack-item"><span class="label">ai</span>OpenAI / RAG / Embeddings</div>
-<div class="stack-item"><span class="label">automation</span>n8n / aiogram / Celery</div>
-<div class="stack-item"><span class="label">infra</span>Docker / Nginx / Render</div>
-<div class="stack-item"><span class="label">browser</span>Chrome Extensions / MV3</div>
-<div class="stack-item"><span class="label">tools</span>Claude Code / Cursor / Git</div>
+<div class="stack-item"><div class="lbl">frontend</div><div class="val">React, Next.js, Vue, Nuxt, Tailwind</div></div>
+<div class="stack-item"><div class="lbl">backend</div><div class="val">FastAPI, Express, NestJS, Node.js</div></div>
+<div class="stack-item"><div class="lbl">базы данных</div><div class="val">PostgreSQL, MongoDB, SQLite, ChromaDB</div></div>
+<div class="stack-item"><div class="lbl">ai</div><div class="val">OpenAI API, RAG, Embeddings, LLM</div></div>
+<div class="stack-item"><div class="lbl">автоматизации</div><div class="val">n8n, aiogram, Celery, Redis</div></div>
+<div class="stack-item"><div class="lbl">инфраструктура</div><div class="val">Docker, Nginx, Render, GitHub Actions</div></div>
+<div class="stack-item"><div class="lbl">браузер</div><div class="val">Chrome Extensions, Manifest V3</div></div>
+<div class="stack-item"><div class="lbl">инструменты</div><div class="val">Claude Code, Cursor, Git</div></div>
 </div>
 </section>
 
 <footer>
 <p>alphcoder &mdash; 2026</p>
 </footer>
-</div>
 
+</div>
 </body>
 </html>

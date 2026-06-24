@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Web Scraper Pipeline | alphcoder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#050505;
+--surface:#0a0a0f;
+--card:#0d0d14;
+--card-inner:#101018;
+--border:rgba(255,255,255,.06);
+--border-hover:rgba(255,255,255,.12);
+--text:#f0f0f5;
+--dim:#5a5a72;
+--accent:#f56516;
+--accent2:#ff9a5c;
+--accent-glow:rgba(245,101,22,.12);
+--accent-glow-strong:rgba(245,101,22,.25);
+--green:#22c55e;
+--yellow:#eab308;
+--red:#ef4444;
+--ease-out-expo:cubic-bezier(0.32,0.72,0,1);
+--ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+--mono:'JetBrains Mono',monospace;
+--sans:'Plus Jakarta Sans',system-ui,sans-serif;
+}
+html{scroll-behavior:smooth}
+body{background:var(--bg);color:var(--text);font-family:var(--sans);line-height:1.6;overflow-x:hidden;-webkit-font-smoothing:antialiased;min-height:100vh}
+a{color:inherit;text-decoration:none}
+::selection{background:var(--accent);color:#fff}
+input,button{font-family:inherit}
+
+/* GRAIN */
+.grain{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* NAV */
+nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:100;background:rgba(13,13,20,.72);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--border);border-radius:100px;padding:.5rem 1.5rem;display:flex;align-items:center;gap:1.5rem;transition:all 700ms var(--ease-out-expo)}
+nav .logo{font-weight:800;font-size:.85rem;letter-spacing:-.02em;white-space:nowrap;display:flex;align-items:center;gap:.6rem}
+nav .logo svg{flex-shrink:0}
+nav .back-link{font-size:.7rem;color:var(--dim);font-weight:500;padding:.4rem .9rem;border-radius:100px;transition:all 500ms var(--ease-out-expo);display:flex;align-items:center;gap:.4rem;border:1px solid var(--border)}
+nav .back-link:hover{color:var(--text);border-color:var(--border-hover);background:rgba(255,255,255,.03)}
+nav .back-link svg{width:12px;height:12px;transition:transform 400ms var(--ease-out-expo)}
+nav .back-link:hover svg{transform:translateX(-2px)}
+
+/* WRAP */
+.wrap{max-width:1100px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
+
+/* HEADER */
+.page-header{padding:7rem 0 3rem;text-align:center}
+.page-header .eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:var(--card);border:1px solid var(--border);border-radius:100px;padding:.35rem 1rem;font-size:.6rem;font-weight:500;color:var(--accent2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:1.5rem}
+.page-header .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.page-header h1{font-size:clamp(1.8rem,4vw,2.8rem);font-weight:300;letter-spacing:-.03em;line-height:1.15;margin-bottom:1rem}
+.page-header h1 strong{font-weight:800}
+.page-header h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.page-header .sub{font-size:.9rem;color:var(--dim);max-width:500px;margin:0 auto;line-height:1.8}
+
+/* STATS BAR */
+.stats-bar{display:flex;justify-content:center;gap:2rem;padding:2rem 0 3rem;flex-wrap:wrap}
+.stat-item{display:flex;align-items:center;gap:.6rem;padding:.6rem 1.2rem;background:var(--card);border:1px solid var(--border);border-radius:100px}
+.stat-icon{width:32px;height:32px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.stat-icon.orange{background:rgba(245,101,22,.12)}
+.stat-icon.green{background:rgba(34,197,94,.12)}
+.stat-icon.blue{background:rgba(99,102,241,.12)}
+.stat-label{font-size:.65rem;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;font-weight:500;line-height:1.2}
+.stat-value{font-family:var(--mono);font-size:.9rem;font-weight:500;color:var(--text)}
+
+/* CARD */
+.card{background:var(--card);border:1px solid var(--border);border-radius:1.25rem;padding:2rem;transition:all 500ms var(--ease-out-expo)}
+.card:hover{border-color:var(--border-hover)}
+.card-title{font-size:.65rem;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);font-weight:600;margin-bottom:1.5rem;display:flex;align-items:center;gap:.5rem}
+.card-title svg{color:var(--accent);flex-shrink:0}
+
+/* MAIN GRID */
+.main-grid{display:grid;grid-template-columns:1fr 340px;gap:1.5rem;margin-bottom:1.5rem}
+
+/* SCRAPER INPUT */
+.scraper-input{display:flex;gap:.75rem;margin-bottom:2rem}
+.scraper-input input{flex:1;background:var(--card-inner);border:1px solid var(--border);border-radius:.75rem;padding:.85rem 1.2rem;color:var(--text);font-size:.85rem;font-family:var(--mono);transition:all 400ms var(--ease-out-expo);outline:none}
+.scraper-input input::placeholder{color:var(--dim)}
+.scraper-input input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.scrape-btn{background:var(--accent);color:#fff;border:none;padding:.85rem 1.8rem;border-radius:.75rem;font-size:.8rem;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:.5rem;transition:all 400ms var(--ease-out-expo);white-space:nowrap}
+.scrape-btn:hover{opacity:.88;transform:scale(.98)}
+.scrape-btn:active{transform:scale(.95)}
+.scrape-btn:disabled{opacity:.5;cursor:not-allowed;transform:none}
+.scrape-btn svg{flex-shrink:0}
+
+/* PIPELINE */
+.pipeline{display:flex;align-items:center;gap:0;margin-bottom:2rem;position:relative}
+.pipe-step{flex:1;display:flex;flex-direction:column;align-items:center;gap:.6rem;position:relative;z-index:1}
+.pipe-icon{width:48px;height:48px;border-radius:14px;background:var(--card-inner);border:1.5px solid var(--border);display:flex;align-items:center;justify-content:center;transition:all 600ms var(--ease-out-expo);position:relative}
+.pipe-icon svg{color:var(--dim);transition:all 600ms var(--ease-out-expo)}
+.pipe-label{font-size:.65rem;font-weight:600;color:var(--dim);text-transform:uppercase;letter-spacing:.1em;transition:color 600ms var(--ease-out-expo)}
+.pipe-connector{width:100%;height:2px;background:var(--border);position:relative;flex-shrink:0;flex:0 0 auto;min-width:30px;max-width:80px;margin-top:-1.2rem;align-self:center}
+.pipe-connector-fill{position:absolute;inset:0;background:var(--accent);transform:scaleX(0);transform-origin:left;transition:transform 600ms var(--ease-out-expo)}
+
+/* Pipeline active states */
+.pipe-step.active .pipe-icon{border-color:var(--accent);background:var(--accent-glow);box-shadow:0 0 20px var(--accent-glow)}
+.pipe-step.active .pipe-icon svg{color:var(--accent)}
+.pipe-step.active .pipe-label{color:var(--accent)}
+.pipe-step.done .pipe-icon{border-color:var(--green);background:rgba(34,197,94,.1)}
+.pipe-step.done .pipe-icon svg{color:var(--green)}
+.pipe-step.done .pipe-label{color:var(--green)}
+.pipe-connector.active .pipe-connector-fill{transform:scaleX(1)}
+
+/* PROGRESS BAR */
+.progress-wrap{margin-bottom:2rem}
+.progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:.6rem}
+.progress-label{font-size:.7rem;color:var(--dim);font-weight:500}
+.progress-pct{font-family:var(--mono);font-size:.75rem;color:var(--accent);font-weight:500}
+.progress-track{height:4px;background:var(--card-inner);border-radius:100px;overflow:hidden}
+.progress-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--accent),var(--accent2));border-radius:100px;transition:width 300ms var(--ease-out-expo)}
+
+/* RESULT CARD */
+.result-card{background:var(--card-inner);border:1px solid var(--border);border-radius:1rem;padding:1.5rem;opacity:0;transform:translateY(12px);transition:all 600ms var(--ease-out-expo)}
+.result-card.visible{opacity:1;transform:translateY(0)}
+.result-title-row{display:flex;align-items:flex-start;gap:.75rem;margin-bottom:1.2rem}
+.result-title-row svg{flex-shrink:0;margin-top:.15rem;color:var(--accent)}
+.result-site-title{font-size:.95rem;font-weight:700;line-height:1.4}
+.result-site-desc{font-size:.75rem;color:var(--dim);line-height:1.6;margin-top:.3rem}
+.result-metrics{display:grid;grid-template-columns:repeat(3,1fr);gap:.75rem;margin-top:1rem}
+.result-metric{background:var(--card);border-radius:.75rem;padding:.75rem;text-align:center}
+.result-metric-val{font-family:var(--mono);font-size:1.1rem;font-weight:600;color:var(--text)}
+.result-metric-label{font-size:.6rem;color:var(--dim);text-transform:uppercase;letter-spacing:.08em;margin-top:.2rem}
+
+/* TASK QUEUE */
+.queue-list{display:flex;flex-direction:column;gap:.6rem}
+.queue-item{display:flex;align-items:center;gap:.75rem;padding:.75rem 1rem;background:var(--card-inner);border-radius:.75rem;border:1px solid var(--border);transition:all 400ms var(--ease-out-expo)}
+.queue-item:hover{border-color:var(--border-hover)}
+.queue-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
+.queue-dot.completed{background:var(--green);box-shadow:0 0 6px rgba(34,197,94,.4)}
+.queue-dot.running{background:var(--accent);box-shadow:0 0 6px var(--accent-glow-strong);animation:pulse 1.5s infinite}
+.queue-dot.pending{background:var(--dim);opacity:.5}
+.queue-name{flex:1;font-size:.75rem;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.queue-status{font-family:var(--mono);font-size:.6rem;text-transform:uppercase;letter-spacing:.08em;font-weight:500;flex-shrink:0}
+.queue-status.completed{color:var(--green)}
+.queue-status.running{color:var(--accent)}
+.queue-status.pending{color:var(--dim)}
+.queue-time{font-family:var(--mono);font-size:.6rem;color:var(--dim);flex-shrink:0}
+
+/* DATA TABLE */
+.table-card{margin-bottom:3rem}
+.table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+.data-table{width:100%;border-collapse:separate;border-spacing:0;font-size:.78rem}
+.data-table thead th{text-align:left;padding:.75rem 1rem;font-size:.6rem;text-transform:uppercase;letter-spacing:.15em;color:var(--dim);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap}
+.data-table tbody tr{transition:background 300ms ease}
+.data-table tbody tr:hover{background:rgba(255,255,255,.02)}
+.data-table tbody td{padding:.85rem 1rem;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+.data-table .url-cell{font-family:var(--mono);font-size:.7rem;color:var(--accent2);max-width:220px;overflow:hidden;text-overflow:ellipsis}
+.data-table .title-cell{font-weight:600;max-width:200px;overflow:hidden;text-overflow:ellipsis}
+.status-badge{display:inline-flex;align-items:center;gap:.35rem;padding:.25rem .65rem;border-radius:100px;font-size:.6rem;font-weight:600;text-transform:uppercase;letter-spacing:.05em}
+.status-badge.success{background:rgba(34,197,94,.1);color:var(--green)}
+.status-badge.warning{background:rgba(234,179,8,.1);color:var(--yellow)}
+.status-badge.error{background:rgba(239,68,68,.1);color:var(--red)}
+.status-badge .badge-dot{width:5px;height:5px;border-radius:50%;background:currentColor}
+.mono{font-family:var(--mono);font-size:.72rem}
+.dim{color:var(--dim)}
+
+/* FOOTER */
+.page-footer{padding:2rem 0 3rem;text-align:center;border-top:1px solid var(--border)}
+.page-footer p{font-size:.7rem;color:var(--dim);font-weight:400}
+.page-footer a{color:var(--accent);transition:opacity 300ms}
+.page-footer a:hover{opacity:.7}
+
+/* RESPONSIVE */
+@media(max-width:900px){
+  .main-grid{grid-template-columns:1fr}
+  .stats-bar{gap:1rem}
+  .result-metrics{grid-template-columns:repeat(3,1fr)}
+}
+@media(max-width:600px){
+  .wrap{padding:0 1rem}
+  nav{padding:.4rem 1rem;gap:1rem}
+  .page-header{padding:6rem 0 2rem}
+  .scraper-input{flex-direction:column}
+  .pipeline{gap:0}
+  .pipe-connector{min-width:16px}
+  .stats-bar{flex-direction:column;align-items:center;gap:.75rem}
+  .result-metrics{grid-template-columns:1fr 1fr}
+}
+
+/* FADE IN */
+.fade-in{opacity:0;transform:translateY(20px);transition:all 800ms var(--ease-out-expo)}
+.fade-in.visible{opacity:1;transform:translateY(0)}
+</style>
+</head>
+<body>
+
+<div class="grain"></div>
+
+<!-- NAV -->
+<nav>
+  <a href="https://alphcoder.github.io" class="logo">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+    Web Scraper Pipeline
+  </a>
+  <a href="https://alphcoder.github.io" class="back-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    alphcoder
+  </a>
+</nav>
+
+<div class="wrap">
+
+  <!-- HEADER -->
+  <header class="page-header fade-in">
+    <div class="eyebrow">
+      <span class="dot"></span>
+      ИНТЕРАКТИВНАЯ ДЕМО
+    </div>
+    <h1><strong>Web Scraper</strong> <em>Pipeline</em></h1>
+    <p class="sub">Асинхронный скрапинг с очередью задач, парсингом и хранением данных в реальном времени</p>
+  </header>
+
+  <!-- STATS -->
+  <div class="stats-bar fade-in">
+    <div class="stat-item">
+      <div class="stat-icon orange">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+      </div>
+      <div>
+        <div class="stat-label">Всего собрано</div>
+        <div class="stat-value" id="statTotal">1,247</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon green">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+      </div>
+      <div>
+        <div class="stat-label">Очередь</div>
+        <div class="stat-value" id="statQueue">3 в ожидании</div>
+      </div>
+    </div>
+    <div class="stat-item">
+      <div class="stat-icon blue">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/></svg>
+      </div>
+      <div>
+        <div class="stat-label">Хранилище</div>
+        <div class="stat-value">2.4 GB</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MAIN AREA -->
+  <div class="main-grid">
+
+    <!-- LEFT: Scraper -->
+    <div class="card fade-in">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z"/></svg>
+        Парсер
+      </div>
+
+      <!-- Input -->
+      <div class="scraper-input">
+        <input type="text" id="urlInput" placeholder="https://example.com" value="https://habr.com/ru/articles">
+        <button class="scrape-btn" id="scrapeBtn" onclick="startScrape()">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg>
+          Скрапить
+        </button>
+      </div>
+
+      <!-- Pipeline -->
+      <div class="pipeline" id="pipeline">
+        <div class="pipe-step" id="step-fetch">
+          <div class="pipe-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.66 0 3-4.03 3-9s-1.34-9-3-9m0 18c-1.66 0-3-4.03-3-9s1.34-9 3-9"/></svg>
+          </div>
+          <span class="pipe-label">Fetch</span>
+        </div>
+        <div class="pipe-connector" id="conn-1"><div class="pipe-connector-fill"></div></div>
+        <div class="pipe-step" id="step-parse">
+          <div class="pipe-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="16 18 22 12 16 6"/><polyline points="8 6 2 12 8 18"/></svg>
+          </div>
+          <span class="pipe-label">Parse</span>
+        </div>
+        <div class="pipe-connector" id="conn-2"><div class="pipe-connector-fill"></div></div>
+        <div class="pipe-step" id="step-store">
+          <div class="pipe-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 002 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0022 16z"/><polyline points="3.27 6.96 12 12.01 20.73 6.96"/><line x1="12" y1="22.08" x2="12" y2="12"/></svg>
+          </div>
+          <span class="pipe-label">Store</span>
+        </div>
+      </div>
+
+      <!-- Progress -->
+      <div class="progress-wrap" id="progressWrap" style="opacity:0;transition:opacity 400ms ease">
+        <div class="progress-top">
+          <span class="progress-label" id="progressLabel">Ожидание...</span>
+          <span class="progress-pct" id="progressPct">0%</span>
+        </div>
+        <div class="progress-track">
+          <div class="progress-fill" id="progressFill"></div>
+        </div>
+      </div>
+
+      <!-- Result -->
+      <div class="result-card" id="resultCard">
+        <div class="result-title-row">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></svg>
+          <div>
+            <div class="result-site-title" id="resultTitle">--</div>
+            <div class="result-site-desc" id="resultDesc">--</div>
+          </div>
+        </div>
+        <div class="result-metrics">
+          <div class="result-metric">
+            <div class="result-metric-val" id="resLinks">--</div>
+            <div class="result-metric-label">Ссылки</div>
+          </div>
+          <div class="result-metric">
+            <div class="result-metric-val" id="resImages">--</div>
+            <div class="result-metric-label">Картинки</div>
+          </div>
+          <div class="result-metric">
+            <div class="result-metric-val" id="resWords">--</div>
+            <div class="result-metric-label">Слова</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT: Queue -->
+    <div class="card fade-in">
+      <div class="card-title">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></svg>
+        Очередь задач
+      </div>
+      <div class="queue-list" id="queueList">
+        <div class="queue-item">
+          <span class="queue-dot completed"></span>
+          <span class="queue-name">habr.com/ru/articles</span>
+          <span class="queue-status completed">Готово</span>
+          <span class="queue-time">1.2s</span>
+        </div>
+        <div class="queue-item">
+          <span class="queue-dot completed"></span>
+          <span class="queue-name">github.com/trending</span>
+          <span class="queue-status completed">Готово</span>
+          <span class="queue-time">0.8s</span>
+        </div>
+        <div class="queue-item">
+          <span class="queue-dot running"></span>
+          <span class="queue-name">stackoverflow.com/questions</span>
+          <span class="queue-status running">Работает</span>
+          <span class="queue-time">--</span>
+        </div>
+        <div class="queue-item">
+          <span class="queue-dot pending"></span>
+          <span class="queue-name">news.ycombinator.com</span>
+          <span class="queue-status pending">Ожидает</span>
+          <span class="queue-time">--</span>
+        </div>
+        <div class="queue-item">
+          <span class="queue-dot pending"></span>
+          <span class="queue-name">dev.to/top/week</span>
+          <span class="queue-status pending">Ожидает</span>
+          <span class="queue-time">--</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA TABLE -->
+  <div class="card table-card fade-in">
+    <div class="card-title">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="3" y1="15" x2="21" y2="15"/><line x1="9" y1="3" x2="9" y2="21"/></svg>
+      Результаты скрапинга
+    </div>
+    <div class="table-wrap">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>URL</th>
+            <th>Заголовок</th>
+            <th>Статус</th>
+            <th>Элементы</th>
+            <th>Дата</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td class="url-cell">habr.com/ru/articles</td>
+            <td class="title-cell">Все публикации подряд</td>
+            <td><span class="status-badge success"><span class="badge-dot"></span>Успех</span></td>
+            <td class="mono">342</td>
+            <td class="mono dim">2026-06-24</td>
+          </tr>
+          <tr>
+            <td class="url-cell">github.com/trending</td>
+            <td class="title-cell">Trending repositories</td>
+            <td><span class="status-badge success"><span class="badge-dot"></span>Успех</span></td>
+            <td class="mono">128</td>
+            <td class="mono dim">2026-06-24</td>
+          </tr>
+          <tr>
+            <td class="url-cell">stackoverflow.com/questions</td>
+            <td class="title-cell">Top Questions</td>
+            <td><span class="status-badge warning"><span class="badge-dot"></span>Частично</span></td>
+            <td class="mono">89</td>
+            <td class="mono dim">2026-06-23</td>
+          </tr>
+          <tr>
+            <td class="url-cell">news.ycombinator.com</td>
+            <td class="title-cell">Hacker News</td>
+            <td><span class="status-badge success"><span class="badge-dot"></span>Успех</span></td>
+            <td class="mono">214</td>
+            <td class="mono dim">2026-06-23</td>
+          </tr>
+          <tr>
+            <td class="url-cell">dev.to/top/week</td>
+            <td class="title-cell">Top posts this week</td>
+            <td><span class="status-badge error"><span class="badge-dot"></span>Ошибка</span></td>
+            <td class="mono">0</td>
+            <td class="mono dim">2026-06-22</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <footer class="page-footer">
+    <p><a href="https://alphcoder.github.io">alphcoder</a> &middot; Web Scraper Pipeline Demo</p>
+  </footer>
+
+</div>
+
+<script>
+// Simulated scrape data per-domain
+const scrapeDB = {
+  'habr.com': {
+    title: 'Хабр - Все публикации подряд',
+    desc: 'Крупнейшая русскоязычная IT-платформа. Статьи, новости, обзоры технологий и разработки.',
+    links: 342, images: 87, words: 28450
+  },
+  'github.com': {
+    title: 'GitHub Trending Repositories',
+    desc: 'The world\'s leading platform for software development, version control and collaboration.',
+    links: 128, images: 45, words: 9320
+  },
+  'stackoverflow.com': {
+    title: 'Stack Overflow - Top Questions',
+    desc: 'The largest community for developers to learn, share knowledge, and build careers.',
+    links: 214, images: 12, words: 41200
+  },
+  'news.ycombinator.com': {
+    title: 'Hacker News',
+    desc: 'A social news website focusing on computer science and entrepreneurship.',
+    links: 156, images: 3, words: 6780
+  },
+  'dev.to': {
+    title: 'DEV Community - Top Posts',
+    desc: 'A constructive community for software developers. Write, read, and discuss ideas.',
+    links: 198, images: 62, words: 18900
+  },
+  'default': {
+    title: 'Web-страница',
+    desc: 'Содержимое страницы успешно извлечено и сохранено в хранилище.',
+    links: 73, images: 21, words: 5400
+  }
+};
+
+let isRunning = false;
+
+function getDomain(url) {
+  try {
+    let cleaned = url.replace(/^https?:\/\//, '').replace(/^www\./, '');
+    return cleaned.split('/')[0];
+  } catch {
+    return 'default';
+  }
+}
+
+function getScrapeData(url) {
+  const domain = getDomain(url);
+  for (const key of Object.keys(scrapeDB)) {
+    if (domain.includes(key) || key.includes(domain)) {
+      return scrapeDB[key];
+    }
+  }
+  // Generate random-ish data for unknown domains
+  return {
+    title: domain + ' - ' + scrapeDB['default'].title,
+    desc: scrapeDB['default'].desc,
+    links: 40 + Math.floor(Math.random() * 200),
+    images: 5 + Math.floor(Math.random() * 60),
+    words: 2000 + Math.floor(Math.random() * 30000)
+  };
+}
+
+function resetPipeline() {
+  ['step-fetch','step-parse','step-store'].forEach(id => {
+    document.getElementById(id).classList.remove('active','done');
+  });
+  ['conn-1','conn-2'].forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  document.getElementById('progressFill').style.width = '0%';
+  document.getElementById('progressPct').textContent = '0%';
+  document.getElementById('progressLabel').textContent = 'Ожидание...';
+  document.getElementById('resultCard').classList.remove('visible');
+}
+
+function animateProgress(from, to, duration, label) {
+  return new Promise(resolve => {
+    const pctEl = document.getElementById('progressPct');
+    const fillEl = document.getElementById('progressFill');
+    const labelEl = document.getElementById('progressLabel');
+    labelEl.textContent = label;
+    const start = performance.now();
+    function tick(now) {
+      const t = Math.min((now - start) / duration, 1);
+      const eased = 1 - Math.pow(1 - t, 3);
+      const val = Math.round(from + (to - from) * eased);
+      pctEl.textContent = val + '%';
+      fillEl.style.width = val + '%';
+      if (t < 1) requestAnimationFrame(tick);
+      else resolve();
+    }
+    requestAnimationFrame(tick);
+  });
+}
+
+function delay(ms) {
+  return new Promise(r => setTimeout(r, ms));
+}
+
+async function startScrape() {
+  if (isRunning) return;
+  const url = document.getElementById('urlInput').value.trim();
+  if (!url) return;
+
+  isRunning = true;
+  const btn = document.getElementById('scrapeBtn');
+  btn.disabled = true;
+
+  resetPipeline();
+  document.getElementById('progressWrap').style.opacity = '1';
+
+  // Step 1: Fetch
+  document.getElementById('step-fetch').classList.add('active');
+  await animateProgress(0, 33, 600, 'Загрузка страницы...');
+  await delay(200);
+  document.getElementById('step-fetch').classList.remove('active');
+  document.getElementById('step-fetch').classList.add('done');
+  document.getElementById('conn-1').classList.add('active');
+
+  // Step 2: Parse
+  await delay(150);
+  document.getElementById('step-parse').classList.add('active');
+  await animateProgress(33, 66, 600, 'Парсинг HTML...');
+  await delay(200);
+  document.getElementById('step-parse').classList.remove('active');
+  document.getElementById('step-parse').classList.add('done');
+  document.getElementById('conn-2').classList.add('active');
+
+  // Step 3: Store
+  await delay(150);
+  document.getElementById('step-store').classList.add('active');
+  await animateProgress(66, 100, 500, 'Сохранение данных...');
+  await delay(200);
+  document.getElementById('step-store').classList.remove('active');
+  document.getElementById('step-store').classList.add('done');
+  document.getElementById('progressLabel').textContent = 'Завершено';
+
+  // Show result
+  const data = getScrapeData(url);
+  document.getElementById('resultTitle').textContent = data.title;
+  document.getElementById('resultDesc').textContent = data.desc;
+  document.getElementById('resLinks').textContent = data.links;
+  document.getElementById('resImages').textContent = data.images;
+  document.getElementById('resWords').textContent = data.words.toLocaleString('ru-RU');
+
+  await delay(100);
+  document.getElementById('resultCard').classList.add('visible');
+
+  // Add row to table
+  const domain = getDomain(url);
+  const tbody = document.getElementById('tableBody');
+  const newRow = document.createElement('tr');
+  newRow.style.opacity = '0';
+  newRow.style.transform = 'translateY(8px)';
+  newRow.style.transition = 'all 500ms cubic-bezier(0.32,0.72,0,1)';
+  newRow.innerHTML = `
+    <td class="url-cell">${domain}</td>
+    <td class="title-cell">${data.title.substring(0, 35)}</td>
+    <td><span class="status-badge success"><span class="badge-dot"></span>Успех</span></td>
+    <td class="mono">${data.links}</td>
+    <td class="mono dim">2026-06-24</td>
+  `;
+  tbody.insertBefore(newRow, tbody.firstChild);
+  await delay(50);
+  newRow.style.opacity = '1';
+  newRow.style.transform = 'translateY(0)';
+
+  // Update stat
+  const totalEl = document.getElementById('statTotal');
+  const current = parseInt(totalEl.textContent.replace(/\D/g, ''));
+  const newTotal = current + data.links;
+  totalEl.textContent = newTotal.toLocaleString('en-US');
+
+  // Update queue: add this URL as completed at top
+  const queueList = document.getElementById('queueList');
+  const queueItem = document.createElement('div');
+  queueItem.className = 'queue-item';
+  queueItem.style.opacity = '0';
+  queueItem.style.transform = 'translateY(-8px)';
+  queueItem.style.transition = 'all 500ms cubic-bezier(0.32,0.72,0,1)';
+  const displayTime = (0.5 + Math.random() * 1.5).toFixed(1);
+  queueItem.innerHTML = `
+    <span class="queue-dot completed"></span>
+    <span class="queue-name">${domain}</span>
+    <span class="queue-status completed">Готово</span>
+    <span class="queue-time">${displayTime}s</span>
+  `;
+  queueList.insertBefore(queueItem, queueList.firstChild);
+  await delay(50);
+  queueItem.style.opacity = '1';
+  queueItem.style.transform = 'translateY(0)';
+
+  btn.disabled = false;
+  isRunning = false;
+}
+
+// Intersection observer for fade-ins
+const obs = new IntersectionObserver((entries) => {
+  entries.forEach(e => {
+    if (e.isIntersecting) {
+      e.target.classList.add('visible');
+      obs.unobserve(e.target);
+    }
+  });
+}, { threshold: 0.1 });
+document.querySelectorAll('.fade-in').forEach(el => obs.observe(el));
+</script>
+
+</body>
+</html>

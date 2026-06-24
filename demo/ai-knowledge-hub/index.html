@@ -1,0 +1,857 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Knowledge Hub — RAG Document Q&A</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#050505;
+  --card:#0d0d14;
+  --card-inner:#12121c;
+  --accent:#7c3aed;
+  --accent-dim:rgba(124,58,237,.15);
+  --accent-glow:rgba(124,58,237,.35);
+  --text:#e2e2e8;
+  --text-dim:#8888a0;
+  --border:#1a1a2e;
+  --border-accent:rgba(124,58,237,.3);
+  --success:#22c55e;
+  --sans:'Plus Jakarta Sans',system-ui,sans-serif;
+  --mono:'JetBrains Mono',monospace;
+  --ease:cubic-bezier(.22,1,.36,1);
+  --ease-bounce:cubic-bezier(.34,1.56,.64,1);
+}
+html{font-size:15px;scroll-behavior:smooth}
+body{
+  font-family:var(--sans);
+  background:var(--bg);
+  color:var(--text);
+  min-height:100vh;
+  overflow-x:hidden;
+  line-height:1.6;
+}
+
+/* ---- Film Grain Overlay ---- */
+body::after{
+  content:'';
+  position:fixed;
+  inset:0;
+  pointer-events:none;
+  z-index:9999;
+  opacity:.035;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='g'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23g)'/%3E%3C/svg%3E");
+  background-size:128px 128px;
+}
+
+/* ---- Floating Pill Navbar ---- */
+.navbar{
+  position:fixed;
+  top:16px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:100;
+  display:flex;
+  align-items:center;
+  gap:24px;
+  padding:10px 28px;
+  background:rgba(13,13,20,.82);
+  backdrop-filter:blur(20px) saturate(1.4);
+  -webkit-backdrop-filter:blur(20px) saturate(1.4);
+  border:1px solid var(--border);
+  border-radius:999px;
+  box-shadow:0 4px 30px rgba(0,0,0,.4),inset 0 1px 0 rgba(255,255,255,.03);
+  transition:box-shadow .4s var(--ease);
+}
+.navbar:hover{box-shadow:0 4px 40px rgba(124,58,237,.12),inset 0 1px 0 rgba(255,255,255,.04)}
+.navbar-brand{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  text-decoration:none;
+  color:var(--text);
+  font-weight:700;
+  font-size:.93rem;
+  letter-spacing:-.02em;
+}
+.navbar-brand svg{flex-shrink:0}
+.navbar-link{
+  color:var(--text-dim);
+  text-decoration:none;
+  font-size:.82rem;
+  font-weight:500;
+  transition:color .3s var(--ease);
+  display:flex;
+  align-items:center;
+  gap:6px;
+}
+.navbar-link:hover{color:var(--accent)}
+.navbar-link svg{width:14px;height:14px}
+
+/* ---- Layout ---- */
+.app{
+  display:grid;
+  grid-template-columns:240px 1fr;
+  gap:0;
+  min-height:100vh;
+  padding-top:72px;
+}
+
+/* ---- Sidebar ---- */
+.sidebar{
+  border-right:1px solid var(--border);
+  padding:20px 16px;
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  position:sticky;
+  top:72px;
+  height:calc(100vh - 72px);
+}
+.sidebar-title{
+  font-size:.72rem;
+  font-weight:600;
+  text-transform:uppercase;
+  letter-spacing:.1em;
+  color:var(--text-dim);
+  padding:0 12px;
+  margin-bottom:4px;
+}
+.collection{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  padding:10px 12px;
+  border-radius:10px;
+  cursor:pointer;
+  transition:all .3s var(--ease);
+  border:1px solid transparent;
+  font-size:.88rem;
+  font-weight:500;
+  color:var(--text-dim);
+  position:relative;
+}
+.collection:hover{
+  background:rgba(124,58,237,.06);
+  color:var(--text);
+}
+.collection.active{
+  background:var(--accent-dim);
+  color:var(--text);
+  border-color:var(--border-accent);
+}
+.collection.active::before{
+  content:'';
+  position:absolute;
+  left:0;
+  top:50%;
+  transform:translateY(-50%);
+  width:3px;
+  height:20px;
+  background:var(--accent);
+  border-radius:0 3px 3px 0;
+}
+.collection svg{width:18px;height:18px;flex-shrink:0;opacity:.6}
+.collection.active svg{opacity:1}
+.collection-count{
+  margin-left:auto;
+  font-size:.72rem;
+  font-family:var(--mono);
+  color:var(--text-dim);
+  background:rgba(255,255,255,.04);
+  padding:2px 7px;
+  border-radius:6px;
+}
+
+.sidebar-footer{
+  margin-top:auto;
+  padding:12px;
+  border-top:1px solid var(--border);
+}
+.token-counter{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  font-size:.75rem;
+  font-family:var(--mono);
+  color:var(--text-dim);
+}
+.token-dot{
+  width:6px;height:6px;
+  border-radius:50%;
+  background:var(--success);
+  box-shadow:0 0 6px var(--success);
+  animation:pulse-dot 2s ease infinite;
+}
+@keyframes pulse-dot{
+  0%,100%{opacity:1}
+  50%{opacity:.4}
+}
+
+/* ---- Main Content ---- */
+.main{
+  display:flex;
+  flex-direction:column;
+  height:calc(100vh - 72px);
+  position:relative;
+}
+
+/* ---- Upload Zone ---- */
+.upload-zone{
+  margin:16px 20px 0;
+  border:1.5px dashed var(--border);
+  border-radius:14px;
+  padding:18px 24px;
+  display:flex;
+  align-items:center;
+  gap:16px;
+  cursor:pointer;
+  transition:all .4s var(--ease);
+  position:relative;
+  overflow:hidden;
+  /* double bezel */
+  background:var(--card);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 0 0 1px rgba(0,0,0,.5);
+}
+.upload-zone:hover{
+  border-color:var(--accent);
+  background:rgba(124,58,237,.04);
+}
+.upload-zone.uploading{
+  border-color:var(--accent);
+  pointer-events:none;
+}
+.upload-zone.done{
+  border-style:solid;
+  border-color:rgba(34,197,94,.3);
+}
+.upload-icon{
+  width:40px;height:40px;
+  border-radius:10px;
+  background:var(--accent-dim);
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+}
+.upload-icon svg{width:20px;height:20px;color:var(--accent)}
+.upload-text h4{font-size:.88rem;font-weight:600;margin-bottom:2px}
+.upload-text p{font-size:.78rem;color:var(--text-dim)}
+.upload-progress{
+  position:absolute;
+  bottom:0;left:0;
+  height:3px;
+  background:linear-gradient(90deg,var(--accent),#a78bfa);
+  width:0;
+  transition:width .3s linear;
+  border-radius:0 2px 0 0;
+}
+.upload-result{
+  display:none;
+  align-items:center;
+  gap:10px;
+  font-size:.82rem;
+}
+.upload-result.show{display:flex}
+.upload-result svg{color:var(--success);width:16px;height:16px;flex-shrink:0}
+.upload-result .file-name{font-weight:600;color:var(--text)}
+.upload-result .file-meta{color:var(--text-dim);font-family:var(--mono);font-size:.75rem}
+
+/* ---- Chat Area ---- */
+.chat-area{
+  flex:1;
+  overflow-y:auto;
+  padding:20px 20px 12px;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  scroll-behavior:smooth;
+}
+.chat-area::-webkit-scrollbar{width:5px}
+.chat-area::-webkit-scrollbar-track{background:transparent}
+.chat-area::-webkit-scrollbar-thumb{background:var(--border);border-radius:10px}
+
+.message{
+  display:flex;
+  gap:12px;
+  max-width:720px;
+  animation:msg-in .5s var(--ease) both;
+}
+@keyframes msg-in{
+  from{opacity:0;transform:translateY(12px)}
+  to{opacity:1;transform:translateY(0)}
+}
+.message.user{align-self:flex-end;flex-direction:row-reverse}
+.message.user .msg-content{
+  background:var(--accent);
+  color:#fff;
+  border-radius:16px 16px 4px 16px;
+}
+.msg-avatar{
+  width:32px;height:32px;
+  border-radius:10px;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;
+  /* double bezel */
+  background:var(--card);
+  border:1px solid var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.04),0 2px 8px rgba(0,0,0,.3);
+}
+.msg-avatar svg{width:16px;height:16px}
+.message.user .msg-avatar{
+  background:var(--accent-dim);
+  border-color:var(--border-accent);
+}
+.msg-content{
+  /* double bezel card */
+  background:var(--card);
+  border:1px solid var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 2px 12px rgba(0,0,0,.25);
+  border-radius:16px 16px 16px 4px;
+  padding:14px 18px;
+  font-size:.88rem;
+  line-height:1.65;
+}
+.msg-content p+p{margin-top:10px}
+.msg-content code{
+  font-family:var(--mono);
+  font-size:.82rem;
+  background:rgba(124,58,237,.12);
+  padding:1px 6px;
+  border-radius:4px;
+}
+
+/* ---- Sources ---- */
+.sources{
+  display:flex;
+  gap:8px;
+  margin-top:10px;
+  flex-wrap:wrap;
+}
+.source-card{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  padding:6px 12px;
+  border-radius:8px;
+  font-size:.75rem;
+  font-family:var(--mono);
+  /* double bezel */
+  background:var(--card-inner);
+  border:1px solid var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.02),0 1px 4px rgba(0,0,0,.2);
+  color:var(--text-dim);
+  transition:border-color .3s var(--ease);
+}
+.source-card:hover{border-color:var(--border-accent)}
+.source-card svg{width:12px;height:12px;color:var(--accent);flex-shrink:0}
+.source-pct{color:var(--accent);font-weight:600}
+
+/* ---- Typing Indicator ---- */
+.typing{
+  display:flex;
+  gap:12px;
+  max-width:720px;
+  animation:msg-in .4s var(--ease) both;
+}
+.typing-dots{
+  display:flex;
+  gap:4px;
+  padding:14px 20px;
+  background:var(--card);
+  border:1px solid var(--border);
+  border-radius:16px 16px 16px 4px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 2px 12px rgba(0,0,0,.25);
+}
+.typing-dots span{
+  width:7px;height:7px;
+  border-radius:50%;
+  background:var(--text-dim);
+  animation:bounce-dot 1.4s ease infinite;
+}
+.typing-dots span:nth-child(2){animation-delay:.15s}
+.typing-dots span:nth-child(3){animation-delay:.3s}
+@keyframes bounce-dot{
+  0%,60%,100%{transform:translateY(0);opacity:.3}
+  30%{transform:translateY(-8px);opacity:1}
+}
+
+/* ---- Input Bar ---- */
+.input-bar{
+  padding:12px 20px 16px;
+  border-top:1px solid var(--border);
+}
+.input-wrap{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  /* double bezel */
+  background:var(--card);
+  border:1px solid var(--border);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 2px 12px rgba(0,0,0,.25);
+  border-radius:14px;
+  padding:6px 8px 6px 18px;
+  transition:border-color .3s var(--ease),box-shadow .3s var(--ease);
+}
+.input-wrap:focus-within{
+  border-color:var(--border-accent);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.03),0 0 0 3px var(--accent-dim),0 2px 12px rgba(0,0,0,.25);
+}
+.input-wrap input{
+  flex:1;
+  background:none;
+  border:none;
+  outline:none;
+  color:var(--text);
+  font-family:var(--sans);
+  font-size:.9rem;
+  padding:8px 0;
+}
+.input-wrap input::placeholder{color:var(--text-dim)}
+.send-btn{
+  width:40px;height:40px;
+  border-radius:10px;
+  border:none;
+  background:var(--accent);
+  color:#fff;
+  cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  transition:all .3s var(--ease-bounce);
+  flex-shrink:0;
+}
+.send-btn:hover{transform:scale(1.06);box-shadow:0 0 16px var(--accent-glow)}
+.send-btn:active{transform:scale(.96)}
+.send-btn svg{width:18px;height:18px}
+
+/* ---- Scroll Fade Animations ---- */
+.fade-in{
+  opacity:0;
+  transform:translateY(20px);
+  transition:opacity .6s var(--ease),transform .6s var(--ease);
+}
+.fade-in.visible{
+  opacity:1;
+  transform:translateY(0);
+}
+
+/* ---- Responsive ---- */
+@media(max-width:768px){
+  .app{grid-template-columns:1fr}
+  .sidebar{display:none}
+  .navbar{padding:8px 18px;gap:14px}
+}
+</style>
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar">
+  <a href="https://alphcoder.github.io" class="navbar-brand">
+    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+      <path d="M2 17l10 5 10-5"/>
+      <path d="M2 12l10 5 10-5"/>
+    </svg>
+    AI Knowledge Hub
+  </a>
+  <a href="https://alphcoder.github.io" class="navbar-link">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <path d="M15 18l-6-6 6-6"/>
+    </svg>
+    Portfolio
+  </a>
+</nav>
+
+<!-- App -->
+<div class="app">
+
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-title">Коллекции</div>
+
+    <div class="collection active" data-collection="default" onclick="switchCollection(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M22 19a2 2 0 01-2 2H4a2 2 0 01-2-2V5a2 2 0 012-2h5l2 3h9a2 2 0 012 2z"/>
+      </svg>
+      default
+      <span class="collection-count">3</span>
+    </div>
+
+    <div class="collection" data-collection="marketing-docs" onclick="switchCollection(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+        <line x1="16" y1="13" x2="8" y2="13"/>
+        <line x1="16" y1="17" x2="8" y2="17"/>
+        <polyline points="10 9 9 9 8 9"/>
+      </svg>
+      marketing-docs
+      <span class="collection-count">7</span>
+    </div>
+
+    <div class="collection" data-collection="api-reference" onclick="switchCollection(this)">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="16 18 22 12 16 6"/>
+        <polyline points="8 6 2 12 8 18"/>
+      </svg>
+      api-reference
+      <span class="collection-count">12</span>
+    </div>
+
+    <div class="sidebar-footer">
+      <div class="token-counter">
+        <span class="token-dot"></span>
+        <span id="tokenCount">1,247 токенов</span>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main">
+
+    <!-- Upload Zone -->
+    <div class="upload-zone fade-in" id="uploadZone" onclick="simulateUpload()">
+      <div class="upload-icon">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/>
+          <polyline points="17 8 12 3 7 8"/>
+          <line x1="12" y1="3" x2="12" y2="15"/>
+        </svg>
+      </div>
+      <div class="upload-text" id="uploadText">
+        <h4>Загрузить документы</h4>
+        <p>PDF, TXT, MD, DOCX -- перетащите или нажмите</p>
+      </div>
+      <div class="upload-result" id="uploadResult">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="20 6 9 17 4 12"/>
+        </svg>
+        <span class="file-name">report.pdf</span>
+        <span class="file-meta">24 чанка, 15 420 символов</span>
+      </div>
+      <div class="upload-progress" id="uploadProgress"></div>
+    </div>
+
+    <!-- Chat -->
+    <div class="chat-area" id="chatArea">
+
+      <!-- Pre-loaded user message -->
+      <div class="message user fade-in visible">
+        <div class="msg-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+            <circle cx="12" cy="7" r="4"/>
+          </svg>
+        </div>
+        <div class="msg-content">
+          <p>Как работает система авторизации?</p>
+        </div>
+      </div>
+
+      <!-- Pre-loaded bot response -->
+      <div class="message bot fade-in visible">
+        <div class="msg-avatar">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+        <div class="msg-content">
+          <p>Согласно загруженной документации, система авторизации использует JWT-токены с RSA-256 подписью. Токен выдается при успешной аутентификации и содержит <code>user_id</code>, <code>role</code> и <code>exp</code> claims. Время жизни access-токена -- 15 минут, refresh-токена -- 7 дней.</p>
+          <p>Процесс обновления токена происходит автоматически через middleware, который проверяет срок действия перед каждым запросом к защищённым эндпоинтам.</p>
+          <div class="sources">
+            <div class="source-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              auth-docs.md <span class="source-pct">94%</span>
+            </div>
+            <div class="source-card">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+                <polyline points="14 2 14 8 20 8"/>
+              </svg>
+              api-reference.md <span class="source-pct">87%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Input -->
+    <div class="input-bar">
+      <div class="input-wrap">
+        <input type="text" id="chatInput" placeholder="Задайте вопрос по документации..." autocomplete="off">
+        <button class="send-btn" id="sendBtn" onclick="sendMessage()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="22" y1="2" x2="11" y2="13"/>
+            <polygon points="22 2 15 22 11 13 2 9 22 2"/>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+/* ==== DATA ==== */
+const collectionData = {
+  'default': {
+    docs: ['auth-docs.md','api-reference.md','deploy-guide.md'],
+    responses: [
+      {
+        text: 'На основе анализа загруженных документов, развертывание приложения выполняется через Docker Compose. Конфигурация описана в <code>docker-compose.prod.yml</code>. Для production-среды используется Nginx в качестве reverse proxy с SSL-терминацией через Let\'s Encrypt.\n\nМиграции базы данных запускаются автоматически при старте контейнера через entrypoint-скрипт.',
+        sources: [
+          {name:'deploy-guide.md',pct:96},
+          {name:'api-reference.md',pct:72}
+        ]
+      },
+      {
+        text: 'Система логирования построена на ELK-стеке (Elasticsearch, Logstash, Kibana). Каждый микросервис отправляет структурированные JSON-логи через Fluentd.\n\nУровни логирования: <code>DEBUG</code>, <code>INFO</code>, <code>WARN</code>, <code>ERROR</code>, <code>FATAL</code>. В production по умолчанию установлен уровень <code>INFO</code>. Ротация логов настроена на 30 дней.',
+        sources: [
+          {name:'deploy-guide.md',pct:91},
+          {name:'auth-docs.md',pct:68}
+        ]
+      },
+      {
+        text: 'Rate limiting реализован через Redis с использованием алгоритма Token Bucket. Ограничения:\n\n- Аутентифицированные пользователи: 100 запросов/минуту\n- Анонимные: 20 запросов/минуту\n- Webhook-эндпоинты: 500 запросов/минуту\n\nПри превышении лимита возвращается <code>429 Too Many Requests</code> с заголовком <code>Retry-After</code>.',
+        sources: [
+          {name:'api-reference.md',pct:93},
+          {name:'auth-docs.md',pct:81}
+        ]
+      }
+    ]
+  },
+  'marketing-docs': {
+    docs: ['brand-guide.pdf','campaign-q4.md','analytics-setup.md','seo-strategy.docx','content-plan.md','social-media.md','email-templates.md'],
+    responses: [
+      {
+        text: 'Согласно Brand Guide, основные цвета бренда: <code>#7c3aed</code> (Violet 600) для акцентов и <code>#050505</code> (Midnight) для фонов. Шрифт для заголовков -- Plus Jakarta Sans (Bold 700), для основного текста -- тот же шрифт (Regular 400).\n\nЛоготип используется в двух вариантах: полный (горизонтальный) и иконка. Минимальный отступ от краёв -- 24px.',
+        sources: [
+          {name:'brand-guide.pdf',pct:98},
+          {name:'content-plan.md',pct:64}
+        ]
+      },
+      {
+        text: 'Маркетинговая кампания Q4 нацелена на увеличение конверсии на 15%. Ключевые каналы: SEO-контент (40% бюджета), таргетированная реклама (35%), email-рассылки (25%).\n\nA/B тестирование лендингов запланировано на ноябрь. KPI: CTR > 3.2%, CPA < $12, ROAS > 4x.',
+        sources: [
+          {name:'campaign-q4.md',pct:95},
+          {name:'analytics-setup.md',pct:78},
+          {name:'seo-strategy.docx',pct:61}
+        ]
+      }
+    ]
+  },
+  'api-reference': {
+    docs: ['endpoints-v2.md','webhooks.md','errors.md','auth-flow.md','pagination.md','rate-limits.md','sdk-python.md','sdk-node.md','graphql-schema.md','rest-vs-graphql.md','changelog.md','migration-v1-v2.md'],
+    responses: [
+      {
+        text: 'API v2 поддерживает cursor-based пагинацию. Каждый ответ содержит поле <code>next_cursor</code>. Пример запроса:\n\n<code>GET /api/v2/users?limit=50&cursor=eyJpZCI6MTAwfQ</code>\n\nМаксимальный <code>limit</code> -- 100 записей. При отсутствии <code>next_cursor</code> в ответе -- данные исчерпаны. Offset-based пагинация устарела и будет удалена в v3.',
+        sources: [
+          {name:'pagination.md',pct:97},
+          {name:'endpoints-v2.md',pct:85},
+          {name:'migration-v1-v2.md',pct:71}
+        ]
+      },
+      {
+        text: 'Webhook-уведомления отправляются POST-запросом с HMAC-SHA256 подписью в заголовке <code>X-Webhook-Signature</code>. Поддерживаемые события:\n\n- <code>user.created</code> -- создание пользователя\n- <code>payment.completed</code> -- успешная оплата\n- <code>document.processed</code> -- обработка документа\n\nRetry-политика: 3 попытки с экспоненциальной задержкой (1, 5, 25 минут).',
+        sources: [
+          {name:'webhooks.md',pct:96},
+          {name:'endpoints-v2.md',pct:74}
+        ]
+      }
+    ]
+  }
+};
+
+let currentCollection = 'default';
+let responseIndex = {};
+let totalTokens = 1247;
+
+/* ==== COLLECTION SWITCH ==== */
+function switchCollection(el) {
+  document.querySelectorAll('.collection').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  currentCollection = el.dataset.collection;
+
+  /* Clear chat and show welcome for new collection */
+  const chatArea = document.getElementById('chatArea');
+  chatArea.innerHTML = '';
+
+  const data = collectionData[currentCollection];
+  const welcomeMsg = buildBotMessage(
+    'Коллекция <code>' + currentCollection + '</code> загружена. ' +
+    'Доступно документов: ' + data.docs.length + '. Задайте вопрос по содержимому.',
+    [{name: data.docs[0], pct: 100}]
+  );
+  chatArea.appendChild(welcomeMsg);
+  scrollToBottom();
+}
+
+/* ==== UPLOAD SIMULATION ==== */
+let uploadDone = false;
+function simulateUpload() {
+  if (uploadDone) return;
+
+  const zone = document.getElementById('uploadZone');
+  const bar = document.getElementById('uploadProgress');
+  const textEl = document.getElementById('uploadText');
+  const resultEl = document.getElementById('uploadResult');
+
+  zone.classList.add('uploading');
+  textEl.querySelector('h4').textContent = 'Загрузка и индексация...';
+  textEl.querySelector('p').textContent = 'Разбиение на чанки, генерация эмбеддингов';
+
+  let progress = 0;
+  const interval = setInterval(() => {
+    progress += Math.random() * 18 + 5;
+    if (progress >= 100) {
+      progress = 100;
+      clearInterval(interval);
+      setTimeout(() => {
+        zone.classList.remove('uploading');
+        zone.classList.add('done');
+        textEl.style.display = 'none';
+        resultEl.classList.add('show');
+        uploadDone = true;
+        totalTokens += 1580;
+        updateTokenCounter();
+      }, 300);
+    }
+    bar.style.width = progress + '%';
+  }, 200);
+}
+
+/* ==== CHAT ==== */
+function sendMessage() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+
+  input.value = '';
+  const chatArea = document.getElementById('chatArea');
+
+  /* User message */
+  const userMsg = document.createElement('div');
+  userMsg.className = 'message user';
+  userMsg.innerHTML = `
+    <div class="msg-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/>
+        <circle cx="12" cy="7" r="4"/>
+      </svg>
+    </div>
+    <div class="msg-content"><p>${escapeHtml(text)}</p></div>`;
+  chatArea.appendChild(userMsg);
+  scrollToBottom();
+
+  totalTokens += Math.floor(text.length * 1.3 + 40);
+  updateTokenCounter();
+
+  /* Typing indicator */
+  const typing = document.createElement('div');
+  typing.className = 'typing';
+  typing.innerHTML = `
+    <div class="msg-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="typing-dots"><span></span><span></span><span></span></div>`;
+  chatArea.appendChild(typing);
+  scrollToBottom();
+
+  /* Simulated response after delay */
+  setTimeout(() => {
+    chatArea.removeChild(typing);
+
+    const data = collectionData[currentCollection];
+    if (!responseIndex[currentCollection]) responseIndex[currentCollection] = 0;
+    const idx = responseIndex[currentCollection] % data.responses.length;
+    responseIndex[currentCollection]++;
+
+    const resp = data.responses[idx];
+    const botMsg = buildBotMessage(resp.text, resp.sources);
+    chatArea.appendChild(botMsg);
+    scrollToBottom();
+
+    totalTokens += Math.floor(resp.text.length * 1.1 + 80);
+    updateTokenCounter();
+  }, 1500 + Math.random() * 800);
+}
+
+function buildBotMessage(html, sources) {
+  const msg = document.createElement('div');
+  msg.className = 'message bot';
+
+  let sourcesHtml = '';
+  if (sources && sources.length) {
+    sourcesHtml = '<div class="sources">' + sources.map(s => `
+      <div class="source-card">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/>
+          <polyline points="14 2 14 8 20 8"/>
+        </svg>
+        ${s.name} <span class="source-pct">${s.pct}%</span>
+      </div>`).join('') + '</div>';
+  }
+
+  msg.innerHTML = `
+    <div class="msg-avatar">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+        <path d="M2 17l10 5 10-5"/>
+        <path d="M2 12l10 5 10-5"/>
+      </svg>
+    </div>
+    <div class="msg-content">${html}${sourcesHtml}</div>`;
+  return msg;
+}
+
+function scrollToBottom() {
+  const chatArea = document.getElementById('chatArea');
+  requestAnimationFrame(() => {
+    chatArea.scrollTop = chatArea.scrollHeight;
+  });
+}
+
+function updateTokenCounter() {
+  document.getElementById('tokenCount').textContent =
+    totalTokens.toLocaleString('ru-RU') + ' токенов';
+}
+
+function escapeHtml(str) {
+  const d = document.createElement('div');
+  d.textContent = str;
+  return d.innerHTML;
+}
+
+/* ==== Enter key ==== */
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter' && !e.shiftKey) {
+    e.preventDefault();
+    sendMessage();
+  }
+});
+
+/* ==== Scroll-fade observer ==== */
+const observer = new IntersectionObserver(entries => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible');
+    }
+  });
+}, { threshold: 0.1 });
+
+document.querySelectorAll('.fade-in').forEach(el => observer.observe(el));
+</script>
+</body>
+</html>

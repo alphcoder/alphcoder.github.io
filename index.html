@@ -99,6 +99,12 @@ nav ul a:hover{color:var(--text);background:rgba(255,255,255,.05)}
 .b-narrow{grid-column:span 5}
 .b-half{grid-column:span 6}
 
+.links-row{display:flex;gap:.6rem;margin-top:1rem}
+.demo-link{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:.06em;padding:.3rem .7rem;border:1px solid var(--border);border-radius:100px;transition:all 500ms var(--ease-out-expo);display:inline-flex;align-items:center;gap:.3rem;color:var(--accent2)}
+.demo-link:hover{border-color:var(--accent);color:var(--text);background:rgba(139,92,246,.08)}
+.gh-link{color:var(--dim)}
+.gh-link:hover{color:var(--text);border-color:var(--border-hover)}
+
 /* STACK */
 .stack-section{padding:6rem 0}
 .stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border-radius:1.25rem;overflow:hidden;border:1px solid var(--border);background:var(--border)}
@@ -156,7 +162,7 @@ nav ul{display:none}
 
 <div class="bento">
 
-<a href="https://github.com/alphcoder/ai-code-review-bot" class="bento-item b-wide bezel fade-target">
+<div class="bento-item b-wide bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/ai-code-review-bot.png" alt="AI Code Review Bot">
 <div class="info">
@@ -164,11 +170,12 @@ nav ul{display:none}
 <h3>AI Code Review Bot</h3>
 <p>GitHub App для автоматического ревью PR. Парсит diff, находит баги и уязвимости, оставляет inline-комментарии с оценкой качества.</p>
 <div class="pills"><span>FastAPI</span><span>OpenAI</span><span>GitHub API</span><span>SQLAlchemy</span><span>Docker</span></div>
+<div class="links-row"><a href="demo/ai-code-review/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/ai-code-review-bot" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
-<a href="https://github.com/alphcoder/ai-knowledge-hub" class="bento-item b-narrow bezel fade-target">
+<div class="bento-item b-narrow bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/ai-knowledge-hub.png" alt="AI Knowledge Hub">
 <div class="info">
@@ -176,11 +183,12 @@ nav ul{display:none}
 <h3>AI Knowledge Hub</h3>
 <p>RAG-система: загрузка документов, чанкинг, embeddings, семантический поиск, ответы с источниками.</p>
 <div class="pills"><span>FastAPI</span><span>ChromaDB</span><span>OpenAI</span><span>React</span></div>
+<div class="links-row"><a href="demo/ai-knowledge-hub/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/ai-knowledge-hub" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
-<a href="https://github.com/alphcoder/llm-gateway" class="bento-item b-narrow bezel fade-target">
+<div class="bento-item b-narrow bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/llm-gateway.png" alt="LLM Gateway">
 <div class="info">
@@ -188,11 +196,12 @@ nav ul{display:none}
 <h3>LLM Gateway</h3>
 <p>API-шлюз для LLM. Strategy-паттерн, переключение между OpenAI, Anthropic, YandexGPT.</p>
 <div class="pills"><span>FastAPI</span><span>OpenAI</span><span>Anthropic</span><span>YandexGPT</span></div>
+<div class="links-row"><a href="demo/llm-gateway/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/llm-gateway" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
-<a href="https://github.com/alphcoder/sales-dashboard" class="bento-item b-wide bezel fade-target">
+<div class="bento-item b-wide bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/sales-dashboard.png" alt="Sales Dashboard">
 <div class="info">
@@ -200,11 +209,12 @@ nav ul{display:none}
 <h3>Sales Dashboard</h3>
 <p>Аналитическая панель. Каталог, заказы, модуль аналитики с графиками и фильтрацией. Полный fullstack.</p>
 <div class="pills"><span>NestJS</span><span>TypeORM</span><span>PostgreSQL</span><span>Nuxt 3</span><span>Chart.js</span></div>
+<div class="links-row"><a href="demo/sales-dashboard/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/sales-dashboard" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
-<a href="https://github.com/alphcoder/starter-landing" class="bento-item b-half bezel fade-target">
+<div class="bento-item b-half bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/starter-landing.png" alt="Vortex Landing">
 <div class="info">
@@ -212,11 +222,12 @@ nav ul{display:none}
 <h3>Vortex Landing</h3>
 <p>SaaS-лендинг с тёмным UI, дашборд-мокапом, тарифами и отзывами. Чистый HTML/CSS.</p>
 <div class="pills"><span>HTML</span><span>CSS</span><span>SaaS</span><span>Dark UI</span></div>
+<div class="links-row"><a href="https://alphcoder.github.io/starter-landing/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/starter-landing" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
-<a href="https://github.com/alphcoder/web-scraper-pipeline" class="bento-item b-half bezel fade-target">
+<div class="bento-item b-half bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/web-scraper-pipeline.png" alt="Web Scraper Pipeline">
 <div class="info">
@@ -224,11 +235,12 @@ nav ul{display:none}
 <h3>Web Scraper Pipeline</h3>
 <p>Асинхронный скрапинг с Playwright, очередь Celery/Redis, хранение в MongoDB.</p>
 <div class="pills"><span>FastAPI</span><span>Playwright</span><span>MongoDB</span><span>Celery</span></div>
+<div class="links-row"><a href="demo/web-scraper/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/web-scraper-pipeline" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
-<a href="https://github.com/alphcoder/business-starter-kit" class="bento-item b-wide bezel fade-target">
+<div class="bento-item b-wide bezel fade-target">
 <div class="bezel-inner">
 <img class="thumb" src="assets/business-starter-kit.png" alt="Business Starter Kit">
 <div class="info">
@@ -236,9 +248,10 @@ nav ul{display:none}
 <h3>Business Starter Kit</h3>
 <p>Next.js стартер с AmoCRM, YooKassa, Telegram. Готов для SaaS и лендингов с платежами.</p>
 <div class="pills"><span>Next.js</span><span>React</span><span>AmoCRM</span><span>YooKassa</span><span>Telegram</span></div>
+<div class="links-row"><a href="demo/business-kit/" class="demo-link">Демо &#8594;</a><a href="https://github.com/alphcoder/business-starter-kit" class="demo-link gh-link">GitHub &#8594;</a></div>
 </div>
 </div>
-</a>
+</div>
 
 </div>
 </section>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>LLM Gateway — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050505;--s:#0a0a0f;--c:#0d0d14;--ci:#101018;--b:rgba(255,255,255,.06);--t:#f0f0f5;--d:#5a5a72;--a:#10b981;--a2:#6ee7b7;--e:cubic-bezier(.32,.72,0,1)}
+body{background:var(--bg);color:var(--t);font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:100;background:rgba(13,13,20,.7);backdrop-filter:blur(24px);border:1px solid var(--b);border-radius:100px;padding:.5rem 1.5rem;display:flex;align-items:center;gap:1.5rem;font-size:.85rem;font-weight:600}
+nav span{color:var(--a)}a{color:inherit;text-decoration:none}nav a{color:var(--d);font-size:.72rem;transition:color .4s}nav a:hover{color:var(--t)}
+.wrap{max-width:1000px;margin:0 auto;padding:6rem 1.5rem 4rem}
+h1{font-size:1.8rem;font-weight:800;margin-bottom:.5rem;letter-spacing:-.02em}
+.sub{color:var(--d);font-size:.9rem;margin-bottom:2rem}
+.providers{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin-bottom:2rem}
+.prov{background:var(--c);border:2px solid var(--b);border-radius:1rem;padding:1.5rem;cursor:pointer;transition:all .5s var(--e);text-align:center}
+.prov:hover{border-color:rgba(16,185,129,.2)}
+.prov.active{border-color:var(--a);background:rgba(16,185,129,.05)}
+.prov .name{font-weight:700;font-size:1rem;margin-bottom:.3rem}
+.prov .models{font-size:.7rem;color:var(--d);font-family:'JetBrains Mono',monospace}
+.bz{background:var(--c);border:1px solid var(--b);border-radius:1.25rem;padding:.375rem;margin-bottom:1.5rem}
+.bz-in{background:var(--ci);border-radius:calc(1.25rem - .375rem);padding:2rem;box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
+.field{margin-bottom:1.2rem}
+.field label{display:block;font-size:.65rem;color:var(--d);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem;font-family:'JetBrains Mono',monospace}
+.field select,.field input,.field textarea{width:100%;background:var(--s);border:1px solid var(--b);border-radius:8px;padding:.6rem 1rem;color:var(--t);font-family:inherit;font-size:.85rem;outline:none;transition:border-color .4s}
+.field select:focus,.field input:focus,.field textarea:focus{border-color:var(--a)}
+.field textarea{height:80px;resize:vertical;font-family:'JetBrains Mono',monospace;font-size:.75rem}
+.slider-row{display:flex;align-items:center;gap:1rem}
+.slider-row input[type=range]{flex:1;accent-color:var(--a)}
+.slider-row .val{font-family:'JetBrains Mono',monospace;font-size:.75rem;color:var(--a);min-width:2rem}
+.btn{background:var(--a);color:#000;border:none;padding:.65rem 1.5rem;border-radius:100px;font-size:.8rem;font-weight:700;cursor:pointer;font-family:inherit;transition:all .5s var(--e);display:flex;align-items:center;gap:.5rem}
+.btn:hover{opacity:.85;transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn .arrow{width:20px;height:20px;border-radius:50%;background:rgba(0,0,0,.15);display:flex;align-items:center;justify-content:center}
+.btn .arrow svg{width:10px;height:10px}
+.response{display:none;margin-top:1.5rem}
+.response pre{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:1.2rem;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--a2);overflow-x:auto;line-height:1.8;white-space:pre-wrap}
+.loading{display:inline-block;width:14px;height:14px;border:2px solid rgba(0,0,0,.2);border-top-color:#000;border-radius:50%;animation:sp .6s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+table{width:100%;border-collapse:collapse;font-size:.75rem;margin-top:1rem}
+th{text-align:left;padding:.6rem .8rem;color:var(--d);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--b);font-family:'JetBrains Mono',monospace}
+td{padding:.6rem .8rem;border-bottom:1px solid var(--b);color:var(--d)}
+.status{width:6px;height:6px;border-radius:50%;background:var(--a);display:inline-block;margin-right:.4rem}
+@media(max-width:768px){.providers{grid-template-columns:1fr}.wrap{padding:5rem 1rem 3rem}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<nav><span>LLM</span> Gateway <a href="https://alphcoder.github.io">← Портфолио</a></nav>
+<div class="wrap">
+<h1>LLM Gateway</h1>
+<p class="sub">Единый API для маршрутизации между LLM-провайдерами. Выберите провайдера и отправьте запрос.</p>
+<div class="providers">
+<div class="prov active" onclick="setProv(this,'openai')"><div class="name">OpenAI</div><div class="models">gpt-4o-mini</div></div>
+<div class="prov" onclick="setProv(this,'anthropic')"><div class="name">Anthropic</div><div class="models">claude-3-haiku</div></div>
+<div class="prov" onclick="setProv(this,'yandex')"><div class="name">YandexGPT</div><div class="models">yandexgpt-lite</div></div>
+</div>
+<div class="bz"><div class="bz-in">
+<div class="field"><label>Модель</label><select id="model"><option>gpt-4o-mini</option><option>gpt-4o</option><option>gpt-3.5-turbo</option></select></div>
+<div class="field"><label>Temperature</label><div class="slider-row"><input type="range" min="0" max="100" value="70" oninput="document.getElementById('tempVal').textContent=(this.value/100).toFixed(2)"><span class="val" id="tempVal">0.70</span></div></div>
+<div class="field"><label>Max tokens</label><input type="number" value="256" min="1" max="4096"></div>
+<div class="field"><label>Промпт</label><textarea id="prompt">Объясни разницу между REST и GraphQL в 3 предложениях.</textarea></div>
+<button class="btn" id="sendBtn" onclick="sendReq()"><span id="btnTxt">Отправить запрос</span><span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span></button>
+<div class="response" id="resp"><pre id="respCode"></pre></div>
+</div></div>
+<div class="bz"><div class="bz-in">
+<h3 style="font-size:.9rem;margin-bottom:1rem">История запросов</h3>
+<table><thead><tr><th>Провайдер</th><th>Модель</th><th>Токены</th><th>Latency</th><th>Статус</th></tr></thead>
+<tbody id="history">
+<tr><td>OpenAI</td><td style="font-family:'JetBrains Mono',monospace;font-size:.7rem">gpt-4o-mini</td><td>198</td><td>847ms</td><td><span class="status"></span>OK</td></tr>
+<tr><td>Anthropic</td><td style="font-family:'JetBrains Mono',monospace;font-size:.7rem">claude-3-haiku</td><td>312</td><td>623ms</td><td><span class="status"></span>OK</td></tr>
+<tr><td>YandexGPT</td><td style="font-family:'JetBrains Mono',monospace;font-size:.7rem">yandexgpt-lite</td><td>156</td><td>1204ms</td><td><span class="status"></span>OK</td></tr>
+<tr><td>OpenAI</td><td style="font-family:'JetBrains Mono',monospace;font-size:.7rem">gpt-4o</td><td>445</td><td>1832ms</td><td><span class="status"></span>OK</td></tr>
+</tbody></table>
+</div></div>
+</div>
+<script>
+let curProv='openai';
+const models={openai:['gpt-4o-mini','gpt-4o','gpt-3.5-turbo'],anthropic:['claude-3-haiku','claude-3.5-sonnet','claude-3-opus'],yandex:['yandexgpt-lite','yandexgpt','yandexgpt-32k']};
+const responses={openai:'REST использует фиксированные эндпоинты с предопределённой структурой ответа, тогда как GraphQL позволяет клиенту запрашивать именно те поля, которые ему нужны. REST проще в реализации и кэшировании, но может приводить к over-fetching или under-fetching данных. GraphQL решает эти проблемы единым гибким эндпоинтом, но добавляет сложность в серверной логике.',anthropic:'REST — архитектурный стиль с ресурсо-ориентированными URL и стандартными HTTP-методами, где сервер определяет форму ответа. GraphQL — язык запросов, позволяющий клиенту декларативно указать нужные данные через единый POST-эндпоинт. Выбор зависит от сценария: REST лучше для простых CRUD-операций, GraphQL — для сложных вложенных запросов с множеством связей.',yandex:'REST API работает через несколько URL-адресов, каждый из которых отвечает за конкретный ресурс, а данные приходят целиком. GraphQL использует один адрес и специальный язык запросов, чтобы получать только нужные данные. REST проще, GraphQL гибче — выбор зависит от задачи.'};
+function setProv(el,p){
+document.querySelectorAll('.prov').forEach(e=>e.classList.remove('active'));
+el.classList.add('active');curProv=p;
+const sel=document.getElementById('model');
+sel.innerHTML=models[p].map(m=>`<option>${m}</option>`).join('');
+}
+function sendReq(){
+const btn=document.getElementById('sendBtn'),txt=document.getElementById('btnTxt');
+btn.disabled=true;txt.innerHTML='<span class="loading"></span> Обработка...';
+const model=document.getElementById('model').value;
+const latency=Math.floor(Math.random()*1500)+400;
+const tokens=Math.floor(Math.random()*300)+100;
+setTimeout(()=>{
+const resp=responses[curProv];
+const json={provider:curProv,model:model,response:resp,tokens:{prompt:42,completion:tokens,total:tokens+42},latency_ms:latency};
+document.getElementById('respCode').textContent=JSON.stringify(json,null,2);
+document.getElementById('resp').style.display='block';
+txt.textContent='Отправить запрос';btn.disabled=false;
+const row=document.createElement('tr');
+row.innerHTML=`<td>${curProv.charAt(0).toUpperCase()+curProv.slice(1)}</td><td style="font-family:'JetBrains Mono',monospace;font-size:.7rem">${model}</td><td>${tokens+42}</td><td>${latency}ms</td><td><span class="status"></span>OK</td>`;
+document.getElementById('history').prepend(row);
+},1500);
+}
+</script>
+</body>
+</html>

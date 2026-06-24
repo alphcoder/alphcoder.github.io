@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Business Starter Kit — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050505;--s:#0a0a0f;--c:#0d0d14;--ci:#101018;--b:rgba(255,255,255,.06);--t:#f0f0f5;--d:#5a5a72;--a:#ec4899;--a2:#f9a8d4;--e:cubic-bezier(.32,.72,0,1)}
+body{background:var(--bg);color:var(--t);font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:100;background:rgba(13,13,20,.7);backdrop-filter:blur(24px);border:1px solid var(--b);border-radius:100px;padding:.5rem 1.5rem;display:flex;align-items:center;gap:1.5rem;font-size:.85rem;font-weight:600}
+nav span{color:var(--a)}a{color:inherit;text-decoration:none}nav a{color:var(--d);font-size:.72rem;transition:color .4s}nav a:hover{color:var(--t)}
+.wrap{max-width:1100px;margin:0 auto;padding:6rem 1.5rem 4rem}
+h1{font-size:1.8rem;font-weight:800;margin-bottom:.5rem;letter-spacing:-.02em}
+.sub{color:var(--d);font-size:.9rem;margin-bottom:2rem}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:1rem;margin-bottom:2rem}
+.stat{background:var(--c);border:1px solid var(--b);border-radius:1rem;padding:1.3rem}
+.stat .v{font-size:1.4rem;font-weight:800;margin-bottom:.15rem}
+.stat .ch{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:#10b981}
+.stat .l{font-size:.65rem;color:var(--d);margin-top:.2rem}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem;margin-bottom:1.5rem}
+.bz{background:var(--c);border:1px solid var(--b);border-radius:1.25rem;padding:.375rem}
+.bz-in{background:var(--ci);border-radius:calc(1.25rem - .375rem);padding:1.5rem;box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
+.bz-in h3{font-size:.85rem;font-weight:700;margin-bottom:1rem}
+.pipeline{display:flex;gap:.5rem;margin-bottom:1rem}
+.col{flex:1}
+.col-head{font-size:.6rem;color:var(--d);text-transform:uppercase;letter-spacing:.15em;text-align:center;margin-bottom:.7rem;font-family:'JetBrains Mono',monospace;padding:.3rem;border-radius:6px;background:var(--s)}
+.lead{background:var(--s);border:1px solid var(--b);border-radius:10px;padding:.8rem;margin-bottom:.5rem;cursor:pointer;transition:all .4s var(--e)}
+.lead:hover{border-color:var(--a);transform:translateY(-2px)}
+.lead .name{font-size:.8rem;font-weight:600;margin-bottom:.2rem}
+.lead .company{font-size:.65rem;color:var(--d)}
+.lead .amount{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--a);margin-top:.3rem}
+.notif{display:flex;align-items:center;gap:.8rem;padding:.7rem;border-bottom:1px solid var(--b);transition:background .3s}
+.notif:hover{background:rgba(255,255,255,.02)}
+.notif:last-child{border:none}
+.notif-icon{width:32px;height:32px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.notif-icon svg{width:16px;height:16px;stroke-width:1.5;fill:none}
+.notif .txt{font-size:.75rem;color:var(--d);line-height:1.5}
+.notif .txt strong{color:var(--t);font-weight:600}
+.notif .time{font-size:.6rem;color:var(--d);margin-left:auto;font-family:'JetBrains Mono',monospace;white-space:nowrap}
+.pay-form{display:flex;flex-direction:column;gap:.8rem}
+.pay-form input{background:var(--s);border:1px solid var(--b);border-radius:8px;padding:.6rem .8rem;color:var(--t);font-family:inherit;font-size:.8rem;outline:none;transition:border-color .4s}
+.pay-form input:focus{border-color:var(--a)}
+.btn{background:var(--a);color:#fff;border:none;padding:.6rem 1.2rem;border-radius:100px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .5s var(--e);width:100%;text-align:center}
+.btn:hover{opacity:.85}
+.modal{display:none;position:fixed;inset:0;z-index:200;background:rgba(0,0,0,.7);backdrop-filter:blur(8px);align-items:center;justify-content:center}
+.modal.show{display:flex}
+.modal-box{background:var(--ci);border:1px solid var(--b);border-radius:1.5rem;padding:2.5rem;max-width:380px;width:90%;text-align:center;animation:pop .4s var(--e)}
+@keyframes pop{from{transform:scale(.9);opacity:0}to{transform:scale(1);opacity:1}}
+.modal-box svg{width:48px;height:48px;stroke:var(--a);margin-bottom:1rem}
+.modal-box h3{margin-bottom:.5rem}
+.modal-box p{font-size:.85rem;color:var(--d);margin-bottom:1.5rem}
+@media(max-width:768px){.stats{grid-template-columns:repeat(2,1fr)}.grid{grid-template-columns:1fr}.wrap{padding:5rem 1rem 3rem}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<nav><span>Business</span> Starter Kit <a href="https://alphcoder.github.io">← Портфолио</a></nav>
+<div class="wrap">
+<h1>Business Starter Kit</h1>
+<p class="sub">CRM-пайплайн, платежи YooKassa, уведомления Telegram. Всё из коробки.</p>
+<div class="stats">
+<div class="stat"><div class="v">47</div><div class="ch">+12%</div><div class="l">Лиды</div></div>
+<div class="stat"><div class="v">23%</div><div class="ch">+3%</div><div class="l">Конверсия</div></div>
+<div class="stat"><div class="v">890K &#8381;</div><div class="ch">+18%</div><div class="l">Выручка</div></div>
+<div class="stat"><div class="v">18 900 &#8381;</div><div class="ch">+5%</div><div class="l">Средний чек</div></div>
+</div>
+<div class="grid">
+<div class="bz"><div class="bz-in">
+<h3>CRM Pipeline</h3>
+<div class="pipeline">
+<div class="col"><div class="col-head">Новый</div>
+<div class="lead"><div class="name">Иванов А.С.</div><div class="company">ООО "Старт"</div><div class="amount">45 000 &#8381;</div></div>
+<div class="lead"><div class="name">Петрова М.В.</div><div class="company">ИП Петрова</div><div class="amount">12 000 &#8381;</div></div>
+</div>
+<div class="col"><div class="col-head">В работе</div>
+<div class="lead"><div class="name">Козлов Д.И.</div><div class="company">TechFlow</div><div class="amount">89 000 &#8381;</div></div>
+</div>
+<div class="col"><div class="col-head">Сделка</div>
+<div class="lead" style="border-color:rgba(16,185,129,.2)"><div class="name">Смирнова О.А.</div><div class="company">MediaPulse</div><div class="amount" style="color:#10b981">156 000 &#8381;</div></div>
+</div>
+</div>
+</div></div>
+<div class="bz"><div class="bz-in">
+<h3>Уведомления Telegram</h3>
+<div class="notif"><div class="notif-icon" style="background:rgba(236,72,153,.1)"><svg viewBox="0 0 24 24" stroke="#ec4899"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></div><div class="txt"><strong>Новый лид:</strong> Иванов А.С. — 45 000 &#8381;</div><div class="time">2 мин</div></div>
+<div class="notif"><div class="notif-icon" style="background:rgba(16,185,129,.1)"><svg viewBox="0 0 24 24" stroke="#10b981"><path d="M20 6L9 17l-5-5"/></svg></div><div class="txt"><strong>Оплата подтверждена:</strong> 156 000 &#8381;</div><div class="time">15 мин</div></div>
+<div class="notif"><div class="notif-icon" style="background:rgba(59,130,246,.1)"><svg viewBox="0 0 24 24" stroke="#3b82f6"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg></div><div class="txt"><strong>Заявка с лендинга #47</strong></div><div class="time">32 мин</div></div>
+<div class="notif"><div class="notif-icon" style="background:rgba(245,158,11,.1)"><svg viewBox="0 0 24 24" stroke="#f59e0b"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg></div><div class="txt"><strong>Лид остыл:</strong> Козлов Д.И. — нет ответа 3 дня</div><div class="time">1 ч</div></div>
+</div></div>
+</div>
+<div class="bz"><div class="bz-in">
+<h3>Оплата YooKassa</h3>
+<div class="pay-form">
+<input value="Консультация по маркетингу" placeholder="Услуга">
+<input type="number" value="15000" placeholder="Сумма, &#8381;">
+<button class="btn" onclick="pay()">Оплатить через YooKassa</button>
+</div>
+</div></div>
+</div>
+<div class="modal" id="modal">
+<div class="modal-box">
+<svg viewBox="0 0 24 24" fill="none" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 12l3 3 5-5"/></svg>
+<h3>Оплата прошла</h3>
+<p>15 000 &#8381; — Консультация по маркетингу. Уведомление отправлено в Telegram.</p>
+<button class="btn" onclick="document.getElementById('modal').classList.remove('show')">Закрыть</button>
+</div>
+</div>
+<script>
+function pay(){
+const btn=event.target;btn.textContent='Обработка...';btn.disabled=true;
+setTimeout(()=>{
+document.getElementById('modal').classList.add('show');
+btn.textContent='Оплатить через YooKassa';btn.disabled=false;
+},1500);
+}
+</script>
+</body>
+</html>

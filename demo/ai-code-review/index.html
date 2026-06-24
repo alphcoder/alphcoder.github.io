@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AI Code Review Bot — Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#050505;--s:#0a0a0f;--c:#0d0d14;--ci:#101018;--b:rgba(255,255,255,.06);--t:#f0f0f5;--d:#5a5a72;--a:#8b5cf6;--a2:#c4b5fd;--e:cubic-bezier(.32,.72,0,1)}
+body{background:var(--bg);color:var(--t);font-family:'Plus Jakarta Sans',system-ui,sans-serif;-webkit-font-smoothing:antialiased}
+.grain{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:100;background:rgba(13,13,20,.7);backdrop-filter:blur(24px);border:1px solid var(--b);border-radius:100px;padding:.5rem 1.5rem;display:flex;align-items:center;gap:1.5rem;font-size:.85rem;font-weight:600}
+nav span{color:var(--a)}
+nav a{color:var(--d);font-size:.72rem;transition:color .4s}
+nav a:hover{color:var(--t)}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:900px;margin:0 auto;padding:6rem 1.5rem 4rem}
+h1{font-size:1.8rem;font-weight:800;margin-bottom:.5rem;letter-spacing:-.02em}
+.sub{color:var(--d);font-size:.9rem;margin-bottom:2rem}
+.bz{background:var(--c);border:1px solid var(--b);border-radius:1.25rem;padding:.375rem;margin-bottom:1.5rem}
+.bz-in{background:var(--ci);border-radius:calc(1.25rem - .375rem);overflow:hidden;box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
+.diff{font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:1.8;overflow-x:auto}
+.diff-line{display:flex;border-bottom:1px solid rgba(255,255,255,.03);padding:0 1rem;transition:background .3s}
+.diff-line:hover{background:rgba(255,255,255,.02)}
+.ln{width:40px;color:var(--d);text-align:right;padding-right:1rem;user-select:none;flex-shrink:0}
+.code{flex:1;white-space:pre}
+.diff-add{background:rgba(16,185,129,.06)}.diff-add .code{color:#6ee7b7}
+.diff-del{background:rgba(239,68,68,.06)}.diff-del .code{color:#fca5a5}
+.comment{background:rgba(139,92,246,.05);border-left:3px solid var(--a);padding:1rem 1rem 1rem 3.5rem;display:none;animation:fadeIn .5s var(--e)}
+@keyframes fadeIn{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+.comment .badge{display:inline-block;font-size:.6rem;font-weight:700;padding:.15rem .5rem;border-radius:100px;margin-right:.5rem;text-transform:uppercase;letter-spacing:.05em}
+.badge-critical{background:rgba(239,68,68,.15);color:#f87171}
+.badge-warning{background:rgba(245,158,11,.15);color:#fbbf24}
+.badge-suggestion{background:rgba(59,130,246,.15);color:#60a5fa}
+.comment p{color:var(--d);font-size:.75rem;margin-top:.3rem;font-family:'Plus Jakarta Sans',sans-serif}
+.actions{display:flex;gap:1rem;align-items:center;margin-bottom:2rem}
+.btn{background:var(--a);color:#fff;border:none;padding:.6rem 1.5rem;border-radius:100px;font-size:.8rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all .5s var(--e);display:flex;align-items:center;gap:.5rem}
+.btn:hover{opacity:.85;transform:scale(.98)}
+.btn:disabled{opacity:.4;cursor:default;transform:none}
+.btn .arrow{width:20px;height:20px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center}
+.btn .arrow svg{width:10px;height:10px}
+.score-box{display:none;align-items:center;gap:1rem;background:var(--c);border:1px solid var(--b);border-radius:100px;padding:.5rem 1.2rem}
+.score-box .num{font-size:1.5rem;font-weight:800}
+.score-box .lbl{font-size:.7rem;color:var(--d)}
+.score-box.show{display:flex}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--b);border:1px solid var(--b);border-radius:1rem;overflow:hidden;margin-top:2rem}
+.stat{background:var(--s);padding:1.5rem;text-align:center}
+.stat .v{font-size:1.5rem;font-weight:800}
+.stat .l{font-size:.65rem;color:var(--d);margin-top:.2rem;letter-spacing:.1em;text-transform:uppercase}
+.loading{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.3);border-top-color:#fff;border-radius:50%;animation:spin .6s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media(max-width:768px){.stats{grid-template-columns:1fr}.wrap{padding:5rem 1rem 3rem}}
+</style>
+</head>
+<body>
+<div class="grain"></div>
+<nav><span>AI</span> Code Review Bot <a href="https://alphcoder.github.io">← Портфолио</a></nav>
+<div class="wrap">
+<h1>AI Code Review Bot</h1>
+<p class="sub">Автоматический ревью пулл-реквестов через GPT-4o-mini. Нажмите "Ревью" чтобы запустить анализ.</p>
+<div class="actions">
+<button class="btn" id="reviewBtn" onclick="runReview()">
+<span id="btnText">Запустить ревью</span>
+<span class="arrow"><svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg></span>
+</button>
+<div class="score-box" id="scoreBox"><div class="num" style="color:#fbbf24">78</div><div><div style="font-size:.85rem;font-weight:700">/ 100</div><div class="lbl">Оценка качества</div></div></div>
+</div>
+<div class="bz"><div class="bz-in"><div class="diff" id="diff"></div></div></div>
+<div class="stats">
+<div class="stat"><div class="v">142</div><div class="l">Ревью</div></div>
+<div class="stat"><div class="v">387</div><div class="l">Замечаний</div></div>
+<div class="stat"><div class="v">82</div><div class="l">Средний балл</div></div>
+</div>
+</div>
+<script>
+const lines=[
+{n:1,code:'import os',type:'ctx'},
+{n:2,code:'from fastapi import FastAPI',type:'ctx'},
+{n:3,code:'',type:'ctx'},
+{n:4,code:'API_KEY = "sk-proj-abc123secret"',type:'add',comment:{severity:'critical',cat:'security',text:'Захардкоженный API-ключ. Используйте переменные окружения (os.environ) для хранения секретов.'}},
+{n:5,code:'',type:'add'},
+{n:6,code:'app = FastAPI()',type:'ctx'},
+{n:7,code:'',type:'ctx'},
+{n:8,code:'@app.get("/users")',type:'ctx'},
+{n:9,code:'def get_users():',type:'ctx'},
+{n:10,code:'    users = db.query(User).all()',type:'ctx'},
+{n:11,code:'    for user in users:',type:'add',comment:{severity:'warning',cat:'performance',text:'N+1 запрос. Каждая итерация выполняет отдельный SELECT. Используйте joinedload() или selectinload() для батч-загрузки.'}},
+{n:12,code:'        user.orders = db.query(Order).filter(Order.user_id == user.id).all()',type:'add'},
+{n:13,code:'    return users',type:'ctx'},
+{n:14,code:'',type:'ctx'},
+{n:15,code:'def process_data(items, config, db, cache, logger, metrics):',type:'add',comment:{severity:'suggestion',cat:'maintainability',text:'Функция принимает 6 параметров и содержит 15+ строк вложенной логики. Разбейте на вспомогательные методы.'}},
+{n:16,code:'    result = []',type:'add'},
+{n:17,code:'    for item in items:',type:'add'},
+{n:18,code:'        if item.status == "active":',type:'add'},
+{n:19,code:'            data = db.query(Data).filter(Data.id == item.data_id).first()',type:'add'},
+{n:20,code:'            if data:',type:'add'},
+{n:21,code:'                transformed = transform(data, config)',type:'add'},
+{n:22,code:'                if cache.exists(transformed.key):',type:'add'},
+{n:23,code:'                    cached = cache.get(transformed.key)',type:'add'},
+{n:24,code:'                    result.append(cached)',type:'add'},
+{n:25,code:'                else:',type:'add'},
+{n:26,code:'                    processed = compute(transformed)',type:'add'},
+{n:27,code:'                    cache.set(transformed.key, processed)',type:'add'},
+{n:28,code:'                    result.append(processed)',type:'add'},
+{n:29,code:'    return result',type:'add'},
+];
+const diff=document.getElementById('diff');
+lines.forEach((l,i)=>{
+const cls=l.type==='add'?'diff-add':l.type==='del'?'diff-del':'';
+let html=`<div class="diff-line ${cls}"><span class="ln">${l.n}</span><span class="code">${l.type==='add'?'+ ':'  '}${esc(l.code)}</span></div>`;
+if(l.comment){
+const bcls=l.comment.severity==='critical'?'badge-critical':l.comment.severity==='warning'?'badge-warning':'badge-suggestion';
+html+=`<div class="comment" id="c${i}"><span class="badge ${bcls}">${l.comment.severity}</span><span class="badge" style="background:rgba(255,255,255,.05);color:var(--d)">${l.comment.cat}</span><p>${l.comment.text}</p></div>`;
+}
+diff.innerHTML+=html;
+});
+function esc(s){return s.replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
+function runReview(){
+const btn=document.getElementById('reviewBtn');
+const txt=document.getElementById('btnText');
+btn.disabled=true;
+txt.innerHTML='<span class="loading"></span> Анализ...';
+const comments=document.querySelectorAll('.comment');
+let delay=800;
+comments.forEach((c,i)=>{
+setTimeout(()=>{c.style.display='block'},delay);
+delay+=600;
+});
+setTimeout(()=>{
+document.getElementById('scoreBox').classList.add('show');
+txt.textContent='Ревью завершён';
+},delay+400);
+}
+</script>
+</body>
+</html>

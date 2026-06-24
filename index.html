@@ -5,195 +5,258 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>alphcoder</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
-:root{--bg:#050508;--surface:#0a0a12;--card:#0e0e18;--border:rgba(255,255,255,.06);--text:#e8e8f0;--dim:#555568;--accent:#7c3aed;--accent2:#a78bfa;--glow:rgba(124,58,237,.08)}
+:root{
+--bg:#050505;
+--surface:#0a0a0f;
+--card:#0d0d14;
+--card-inner:#101018;
+--border:rgba(255,255,255,.06);
+--border-hover:rgba(255,255,255,.12);
+--text:#f0f0f5;
+--dim:#5a5a72;
+--accent:#8b5cf6;
+--accent2:#c4b5fd;
+--glow:rgba(139,92,246,.06);
+--glow-strong:rgba(139,92,246,.12);
+--ease-out-expo:cubic-bezier(0.32,0.72,0,1);
+--ease-spring:cubic-bezier(0.34,1.56,0.64,1);
+}
 html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--text);font-family:'Inter',system-ui,sans-serif;line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+body{background:var(--bg);color:var(--text);font-family:'Plus Jakarta Sans',system-ui,sans-serif;line-height:1.8;overflow-x:hidden;-webkit-font-smoothing:antialiased}
 a{color:inherit;text-decoration:none}
 ::selection{background:var(--accent);color:#fff}
 
-.noise{position:fixed;inset:0;z-index:9999;pointer-events:none;opacity:.03;background:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+.grain{position:fixed;inset:0;z-index:50;pointer-events:none;opacity:.025;background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
 
-.container{max-width:1000px;margin:0 auto;padding:0 2rem}
+.orb{position:fixed;border-radius:50%;filter:blur(120px);pointer-events:none;z-index:0}
+.orb-1{width:500px;height:500px;background:rgba(139,92,246,.07);top:-10%;left:30%}
+.orb-2{width:400px;height:400px;background:rgba(16,185,129,.04);bottom:10%;right:10%}
 
-/* INTRO */
-.intro{min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding-bottom:4rem}
-.intro .mono{font-family:'Consolas',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.25em;text-transform:uppercase;margin-bottom:2rem}
-.intro h1{font-size:clamp(2.5rem,6vw,4.5rem);font-weight:300;letter-spacing:-.03em;line-height:1.15;margin-bottom:2rem}
-.intro h1 strong{font-weight:700}
-.intro h1 em{font-style:normal;color:var(--accent2)}
-.intro .desc{font-size:1rem;color:var(--dim);max-width:480px;line-height:2;margin-bottom:3rem}
-.intro .links{display:flex;gap:1.5rem}
-.intro .links a{font-family:'Consolas',monospace;font-size:.75rem;color:var(--dim);letter-spacing:.1em;padding:.6rem 0;border-bottom:1px solid var(--border);transition:all .4s}
-.intro .links a:hover{color:var(--text);border-color:var(--accent)}
+.wrap{max-width:1100px;margin:0 auto;padding:0 2rem;position:relative;z-index:1}
 
-.divider{width:40px;height:1px;background:var(--border);margin:6rem 0}
+/* NAV */
+nav{position:fixed;top:1.5rem;left:50%;transform:translateX(-50%);z-index:100;background:rgba(13,13,20,.7);backdrop-filter:blur(24px) saturate(180%);border:1px solid var(--border);border-radius:100px;padding:.5rem .5rem .5rem 1.5rem;display:flex;align-items:center;gap:1.5rem;transition:all 700ms var(--ease-out-expo)}
+nav .logo{font-weight:800;font-size:.9rem;letter-spacing:-.02em;white-space:nowrap}
+nav .logo span{color:var(--accent)}
+nav ul{list-style:none;display:flex;gap:.2rem}
+nav ul a{font-size:.75rem;color:var(--dim);padding:.45rem .8rem;border-radius:100px;transition:all 500ms var(--ease-out-expo);font-weight:500}
+nav ul a:hover{color:var(--text);background:rgba(255,255,255,.05)}
+.nav-cta{background:var(--accent);color:#fff;border:none;padding:.5rem 1.2rem;border-radius:100px;font-size:.75rem;font-weight:600;cursor:pointer;font-family:inherit;transition:all 500ms var(--ease-out-expo);display:flex;align-items:center;gap:.5rem}
+.nav-cta:hover{opacity:.85;transform:scale(0.98)}
+.nav-cta .arrow{width:22px;height:22px;border-radius:50%;background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:.65rem;transition:all 500ms var(--ease-out-expo)}
+.nav-cta:hover .arrow{transform:translateX(2px) translateY(-1px);background:rgba(255,255,255,.25)}
+
+/* HERO */
+.hero{min-height:100dvh;display:flex;flex-direction:column;justify-content:center;padding:8rem 0 6rem}
+.hero .eyebrow{display:inline-flex;align-items:center;gap:.5rem;background:var(--card);border:1px solid var(--border);border-radius:100px;padding:.35rem 1rem;font-size:.65rem;font-weight:500;color:var(--accent2);letter-spacing:.15em;text-transform:uppercase;margin-bottom:2.5rem;width:fit-content}
+.hero .eyebrow .dot{width:6px;height:6px;border-radius:50%;background:var(--accent);animation:pulse 2s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.3}}
+.hero h1{font-size:clamp(2.8rem,5.5vw,4.8rem);font-weight:300;letter-spacing:-.04em;line-height:1.1;margin-bottom:2rem}
+.hero h1 strong{font-weight:800}
+.hero h1 em{font-style:normal;background:linear-gradient(135deg,var(--accent),var(--accent2));-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
+.hero .sub{font-size:1.05rem;color:var(--dim);max-width:460px;line-height:2;margin-bottom:3.5rem;font-weight:400}
+.hero .cta-row{display:flex;align-items:center;gap:1rem}
+.hero .cta-row a{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.08em;padding:.7rem 0;transition:all 700ms var(--ease-out-expo);display:flex;align-items:center;gap:.5rem}
+.hero .cta-row a::after{content:'';width:20px;height:1px;background:var(--border);transition:all 700ms var(--ease-out-expo)}
+.hero .cta-row a:hover{color:var(--text)}
+.hero .cta-row a:hover::after{width:40px;background:var(--accent)}
+
+/* FADE IN */
+.fade-target{opacity:0;transform:translateY(40px) scale(0.98);filter:blur(8px);transition:all 900ms var(--ease-out-expo)}
+.fade-target.visible{opacity:1;transform:translateY(0) scale(1);filter:blur(0)}
 
 /* SECTION */
-.section{padding:2rem 0 6rem}
-.section .label{font-family:'Consolas',monospace;font-size:.65rem;color:var(--dim);letter-spacing:.3em;text-transform:uppercase;margin-bottom:3rem}
+.section{padding:6rem 0}
+.section-head{margin-bottom:4rem}
+.section-head .tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--accent2);letter-spacing:.3em;text-transform:uppercase;font-weight:500;margin-bottom:1rem;display:block}
+.section-head h2{font-size:2.2rem;font-weight:700;letter-spacing:-.03em}
 
-/* PROJECT CARDS */
-.projects{display:flex;flex-direction:column;gap:4rem}
-.project{display:grid;grid-template-columns:1fr 1fr;gap:3rem;align-items:center;opacity:0;transform:translateY(30px);animation:fadeUp .8s ease forwards}
-.project:nth-child(2){animation-delay:.15s}
-.project:nth-child(3){animation-delay:.3s}
-.project:nth-child(4){animation-delay:.45s}
-.project:nth-child(5){animation-delay:.6s}
-.project:nth-child(6){animation-delay:.75s}
-.project:nth-child(7){animation-delay:.9s}
-.project:nth-child(even){direction:rtl}
-.project:nth-child(even) > *{direction:ltr}
-@keyframes fadeUp{to{opacity:1;transform:translateY(0)}}
+/* BENTO GRID */
+.bento{display:grid;grid-template-columns:repeat(12,1fr);gap:1.25rem}
+.bento-item{position:relative;border-radius:1.5rem;overflow:hidden;transition:all 700ms var(--ease-out-expo)}
+.bento-item:hover{transform:translateY(-4px)}
 
-.project .visual{position:relative;border-radius:10px;overflow:hidden;border:1px solid var(--border);aspect-ratio:16/10}
-.project .visual img{width:100%;height:100%;object-fit:cover;display:block;transition:transform .6s ease}
-.project:hover .visual img{transform:scale(1.03)}
-.project .visual::after{content:'';position:absolute;inset:0;background:linear-gradient(135deg,var(--glow),transparent);pointer-events:none}
+/* DOUBLE BEZEL */
+.bezel{background:var(--card);border:1px solid var(--border);border-radius:1.5rem;padding:.375rem;transition:border-color 700ms var(--ease-out-expo)}
+.bezel:hover{border-color:var(--border-hover)}
+.bezel-inner{background:var(--card-inner);border-radius:calc(1.5rem - .375rem);overflow:hidden;box-shadow:inset 0 1px 1px rgba(255,255,255,.04)}
 
-.project .info{}
-.project .info .cat{font-family:'Consolas',monospace;font-size:.6rem;color:var(--accent2);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.8rem}
-.project .info h3{font-size:1.4rem;font-weight:600;letter-spacing:-.01em;margin-bottom:.6rem}
-.project .info p{font-size:.85rem;color:var(--dim);line-height:1.9;margin-bottom:1.2rem}
-.project .info .tags{display:flex;flex-wrap:wrap;gap:.4rem}
-.project .info .tags span{font-family:'Consolas',monospace;font-size:.6rem;color:var(--dim);background:rgba(255,255,255,.04);padding:.25rem .55rem;border-radius:3px;letter-spacing:.03em;border:1px solid var(--border)}
-.project .info .link{display:inline-block;font-family:'Consolas',monospace;font-size:.7rem;color:var(--accent2);letter-spacing:.1em;margin-top:1rem;border-bottom:1px solid transparent;transition:border-color .3s}
-.project .info .link:hover{border-color:var(--accent2)}
+.bento-item .thumb{width:100%;aspect-ratio:16/10;object-fit:cover;display:block;transition:transform 800ms var(--ease-out-expo)}
+.bento-item:hover .thumb{transform:scale(1.04)}
+.bento-item .info{padding:1.5rem 1.75rem 1.75rem}
+.bento-item .info .cat{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--accent2);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.6rem;display:block}
+.bento-item .info h3{font-size:1.15rem;font-weight:700;letter-spacing:-.01em;margin-bottom:.5rem}
+.bento-item .info p{font-size:.8rem;color:var(--dim);line-height:1.8;margin-bottom:1rem}
+.bento-item .info .pills{display:flex;flex-wrap:wrap;gap:.35rem}
+.bento-item .info .pills span{font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--dim);background:rgba(255,255,255,.03);border:1px solid var(--border);padding:.2rem .5rem;border-radius:100px;letter-spacing:.02em;transition:all 500ms var(--ease-out-expo)}
+.bento-item:hover .info .pills span{border-color:var(--border-hover)}
+
+.b-wide{grid-column:span 7}
+.b-narrow{grid-column:span 5}
+.b-half{grid-column:span 6}
 
 /* STACK */
-.stack-section{padding:4rem 0 6rem}
-.stack-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:1px;background:var(--border);border:1px solid var(--border);border-radius:8px;overflow:hidden}
-.stack-item{background:var(--surface);padding:1.5rem}
-.stack-item .lbl{font-family:'Consolas',monospace;font-size:.55rem;color:var(--accent2);letter-spacing:.2em;text-transform:uppercase;margin-bottom:.5rem}
-.stack-item .val{font-size:.85rem;color:var(--dim);line-height:1.6}
+.stack-section{padding:6rem 0}
+.stack-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1px;border-radius:1.25rem;overflow:hidden;border:1px solid var(--border);background:var(--border)}
+.stack-cell{background:var(--surface);padding:2rem 1.5rem;transition:background 500ms var(--ease-out-expo)}
+.stack-cell:hover{background:var(--card)}
+.stack-cell .lbl{font-family:'JetBrains Mono',monospace;font-size:.5rem;color:var(--accent2);letter-spacing:.25em;text-transform:uppercase;margin-bottom:.6rem;display:block}
+.stack-cell .val{font-size:.82rem;color:var(--dim);line-height:1.7}
 
 /* FOOTER */
-footer{border-top:1px solid var(--border);padding:4rem 0;text-align:center}
-footer p{font-family:'Consolas',monospace;font-size:.7rem;color:var(--dim);letter-spacing:.15em}
+footer{border-top:1px solid var(--border);padding:5rem 0;text-align:center}
+footer p{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--dim);letter-spacing:.2em}
 
 @media(max-width:768px){
-.project{grid-template-columns:1fr;gap:1.5rem}
-.project:nth-child(even){direction:ltr}
-.intro h1{font-size:2rem}
+nav ul{display:none}
+.hero h1{font-size:2rem}
+.bento{grid-template-columns:1fr}
+.b-wide,.b-narrow,.b-half{grid-column:span 1}
 .stack-grid{grid-template-columns:1fr 1fr}
+.wrap{padding:0 1.2rem}
+.hero{padding:6rem 0 4rem}
+.section{padding:4rem 0}
 }
 </style>
 </head>
 <body>
-<div class="noise"></div>
+<div class="grain"></div>
+<div class="orb orb-1"></div>
+<div class="orb orb-2"></div>
 
-<div class="container">
+<nav>
+<div class="logo">alph<span>coder</span></div>
+<ul>
+<li><a href="#projects">Проекты</a></li>
+<li><a href="#stack">Стек</a></li>
+</ul>
+<a href="https://github.com/alphcoder" class="nav-cta">GitHub <span class="arrow">&#8599;</span></a>
+</nav>
 
-<section class="intro">
-<div class="mono">fullstack-разработчик</div>
-<h1><strong>Бэкенды.</strong> <em>AI.</em><br><strong>Расширения.</strong> Автоматизации.</h1>
-<p class="desc">Проектирую архитектуру, интегрирую нейросети, строю продукты от идеи до деплоя. Чистый код, быстрая доставка.</p>
-<div class="links">
-<a href="https://github.com/alphcoder">github</a>
+<div class="wrap">
+
+<section class="hero">
+<div class="eyebrow"><span class="dot"></span> fullstack-разработчик</div>
+<h1><strong>Бэкенды.</strong> <em>AI.</em><br>Автоматизации.<br><strong>Продукты.</strong></h1>
+<p class="sub">Проектирую архитектуру, интегрирую нейросети, строю от прототипа до продакшена. Код, который работает и масштабируется.</p>
+<div class="cta-row">
+<a href="https://github.com/alphcoder">Все проекты на GitHub</a>
 </div>
 </section>
 
-<div class="divider"></div>
+<section class="section" id="projects">
+<div class="section-head fade-target">
+<span class="tag">Проекты</span>
+<h2>Избранные работы</h2>
+</div>
 
-<section class="section">
-<div class="label">проекты</div>
-<div class="projects">
+<div class="bento">
 
-<a href="https://github.com/alphcoder/ai-code-review-bot" class="project">
-<div class="visual"><img src="assets/ai-code-review-bot.png" alt="AI Code Review Bot"></div>
+<a href="https://github.com/alphcoder/ai-code-review-bot" class="bento-item b-wide bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/ai-code-review-bot.png" alt="AI Code Review Bot">
 <div class="info">
-<div class="cat">ai / devtools</div>
+<span class="cat">ai / devtools</span>
 <h3>AI Code Review Bot</h3>
-<p>GitHub App для автоматического ревью пулл-реквестов. Парсит diff, находит баги и уязвимости, оставляет inline-комментарии с оценкой качества кода.</p>
-<div class="tags"><span>FastAPI</span><span>OpenAI</span><span>GitHub API</span><span>SQLAlchemy</span><span>Docker</span></div>
-<span class="link">github &#8594;</span>
+<p>GitHub App для автоматического ревью PR. Парсит diff, находит баги и уязвимости, оставляет inline-комментарии с оценкой качества.</p>
+<div class="pills"><span>FastAPI</span><span>OpenAI</span><span>GitHub API</span><span>SQLAlchemy</span><span>Docker</span></div>
+</div>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/ai-knowledge-hub" class="project">
-<div class="visual"><img src="assets/ai-knowledge-hub.png" alt="AI Knowledge Hub"></div>
+<a href="https://github.com/alphcoder/ai-knowledge-hub" class="bento-item b-narrow bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/ai-knowledge-hub.png" alt="AI Knowledge Hub">
 <div class="info">
-<div class="cat">ai / rag</div>
+<span class="cat">ai / rag</span>
 <h3>AI Knowledge Hub</h3>
-<p>RAG-система для Q&A по документам. Загрузка файлов, рекурсивный чанкинг, векторные embeddings, семантический поиск, ответы с цитированием источников.</p>
-<div class="tags"><span>FastAPI</span><span>ChromaDB</span><span>OpenAI</span><span>React</span><span>Docker</span></div>
-<span class="link">github &#8594;</span>
+<p>RAG-система: загрузка документов, чанкинг, embeddings, семантический поиск, ответы с источниками.</p>
+<div class="pills"><span>FastAPI</span><span>ChromaDB</span><span>OpenAI</span><span>React</span></div>
+</div>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/llm-gateway" class="project">
-<div class="visual"><img src="assets/llm-gateway.png" alt="LLM Gateway"></div>
+<a href="https://github.com/alphcoder/llm-gateway" class="bento-item b-narrow bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/llm-gateway.png" alt="LLM Gateway">
 <div class="info">
-<div class="cat">ai / backend</div>
+<span class="cat">ai / backend</span>
 <h3>LLM Gateway</h3>
-<p>Унифицированный API-шлюз для LLM-провайдеров. Strategy-паттерн, горячее переключение между OpenAI, Anthropic, YandexGPT без изменения клиентского кода.</p>
-<div class="tags"><span>FastAPI</span><span>OpenAI</span><span>Anthropic</span><span>YandexGPT</span></div>
-<span class="link">github &#8594;</span>
+<p>API-шлюз для LLM. Strategy-паттерн, переключение между OpenAI, Anthropic, YandexGPT.</p>
+<div class="pills"><span>FastAPI</span><span>OpenAI</span><span>Anthropic</span><span>YandexGPT</span></div>
+</div>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/sales-dashboard" class="project">
-<div class="visual"><img src="assets/sales-dashboard.png" alt="Sales Dashboard"></div>
+<a href="https://github.com/alphcoder/sales-dashboard" class="bento-item b-wide bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/sales-dashboard.png" alt="Sales Dashboard">
 <div class="info">
-<div class="cat">fullstack</div>
+<span class="cat">fullstack</span>
 <h3>Sales Dashboard</h3>
-<p>Аналитическая панель. Каталог товаров, управление заказами, модуль аналитики с графиками и фильтрацией данных.</p>
-<div class="tags"><span>NestJS</span><span>TypeORM</span><span>PostgreSQL</span><span>Nuxt 3</span><span>Chart.js</span></div>
-<span class="link">github &#8594;</span>
+<p>Аналитическая панель. Каталог, заказы, модуль аналитики с графиками и фильтрацией. Полный fullstack.</p>
+<div class="pills"><span>NestJS</span><span>TypeORM</span><span>PostgreSQL</span><span>Nuxt 3</span><span>Chart.js</span></div>
+</div>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/starter-landing" class="project">
-<div class="visual"><img src="assets/starter-landing.png" alt="Vortex Landing"></div>
+<a href="https://github.com/alphcoder/starter-landing" class="bento-item b-half bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/starter-landing.png" alt="Vortex Landing">
 <div class="info">
-<div class="cat">frontend / landing</div>
+<span class="cat">frontend / landing</span>
 <h3>Vortex Landing</h3>
-<p>Маркетинговый лендинг SaaS-продукта. Тёмный UI, секции с метриками, дашборд-мокап, тарифы, отзывы. Чистый HTML/CSS, без фреймворков.</p>
-<div class="tags"><span>HTML</span><span>CSS</span><span>Landing</span><span>SaaS</span><span>Dark UI</span></div>
-<span class="link">github &#8594;</span>
+<p>SaaS-лендинг с тёмным UI, дашборд-мокапом, тарифами и отзывами. Чистый HTML/CSS.</p>
+<div class="pills"><span>HTML</span><span>CSS</span><span>SaaS</span><span>Dark UI</span></div>
+</div>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/web-scraper-pipeline" class="project">
-<div class="visual"><img src="assets/web-scraper-pipeline.png" alt="Web Scraper Pipeline"></div>
+<a href="https://github.com/alphcoder/web-scraper-pipeline" class="bento-item b-half bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/web-scraper-pipeline.png" alt="Web Scraper Pipeline">
 <div class="info">
-<div class="cat">backend / data</div>
+<span class="cat">backend / data</span>
 <h3>Web Scraper Pipeline</h3>
-<p>Асинхронный скрапинг с очередью задач. Playwright для рендеринга, Celery/Redis для оркестрации, MongoDB для хранения.</p>
-<div class="tags"><span>FastAPI</span><span>Playwright</span><span>MongoDB</span><span>Celery</span><span>Redis</span></div>
-<span class="link">github &#8594;</span>
+<p>Асинхронный скрапинг с Playwright, очередь Celery/Redis, хранение в MongoDB.</p>
+<div class="pills"><span>FastAPI</span><span>Playwright</span><span>MongoDB</span><span>Celery</span></div>
+</div>
 </div>
 </a>
 
-<a href="https://github.com/alphcoder/business-starter-kit" class="project">
-<div class="visual"><img src="assets/business-starter-kit.png" alt="Business Starter Kit"></div>
+<a href="https://github.com/alphcoder/business-starter-kit" class="bento-item b-wide bezel fade-target">
+<div class="bezel-inner">
+<img class="thumb" src="assets/business-starter-kit.png" alt="Business Starter Kit">
 <div class="info">
-<div class="cat">fullstack / integrations</div>
+<span class="cat">fullstack / integrations</span>
 <h3>Business Starter Kit</h3>
-<p>Next.js стартер с интеграциями для бизнеса. AmoCRM для лидов, YooKassa для платежей, Telegram для уведомлений.</p>
-<div class="tags"><span>Next.js</span><span>React</span><span>AmoCRM</span><span>YooKassa</span><span>Telegram</span></div>
-<span class="link">github &#8594;</span>
+<p>Next.js стартер с AmoCRM, YooKassa, Telegram. Готов для SaaS и лендингов с платежами.</p>
+<div class="pills"><span>Next.js</span><span>React</span><span>AmoCRM</span><span>YooKassa</span><span>Telegram</span></div>
+</div>
 </div>
 </a>
 
 </div>
 </section>
 
-<div class="divider"></div>
-
-<section class="stack-section">
-<div class="label">стек</div>
-<div class="stack-grid">
-<div class="stack-item"><div class="lbl">frontend</div><div class="val">React, Next.js, Vue, Nuxt, Tailwind</div></div>
-<div class="stack-item"><div class="lbl">backend</div><div class="val">FastAPI, Express, NestJS, Node.js</div></div>
-<div class="stack-item"><div class="lbl">базы данных</div><div class="val">PostgreSQL, MongoDB, SQLite, ChromaDB</div></div>
-<div class="stack-item"><div class="lbl">ai</div><div class="val">OpenAI API, RAG, Embeddings, LLM</div></div>
-<div class="stack-item"><div class="lbl">автоматизации</div><div class="val">n8n, aiogram, Celery, Redis</div></div>
-<div class="stack-item"><div class="lbl">инфраструктура</div><div class="val">Docker, Nginx, Render, GitHub Actions</div></div>
-<div class="stack-item"><div class="lbl">браузер</div><div class="val">Chrome Extensions, Manifest V3</div></div>
-<div class="stack-item"><div class="lbl">инструменты</div><div class="val">Claude Code, Cursor, Git</div></div>
+<section class="stack-section" id="stack">
+<div class="section-head fade-target">
+<span class="tag">Стек</span>
+<h2>Технологии</h2>
+</div>
+<div class="stack-grid fade-target">
+<div class="stack-cell"><span class="lbl">frontend</span><div class="val">React, Next.js, Vue, Nuxt, Tailwind</div></div>
+<div class="stack-cell"><span class="lbl">backend</span><div class="val">FastAPI, Express, NestJS, Node.js</div></div>
+<div class="stack-cell"><span class="lbl">базы данных</span><div class="val">PostgreSQL, MongoDB, SQLite, ChromaDB</div></div>
+<div class="stack-cell"><span class="lbl">ai</span><div class="val">OpenAI, RAG, Embeddings, LLM</div></div>
+<div class="stack-cell"><span class="lbl">автоматизации</span><div class="val">n8n, aiogram, Celery, Redis</div></div>
+<div class="stack-cell"><span class="lbl">инфраструктура</span><div class="val">Docker, Nginx, Render, CI/CD</div></div>
+<div class="stack-cell"><span class="lbl">браузер</span><div class="val">Chrome Extensions, Manifest V3</div></div>
+<div class="stack-cell"><span class="lbl">инструменты</span><div class="val">Claude Code, Cursor, Git</div></div>
 </div>
 </section>
 
@@ -202,5 +265,19 @@ footer p{font-family:'Consolas',monospace;font-size:.7rem;color:var(--dim);lette
 </footer>
 
 </div>
+
+<script>
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach((entry, i) => {
+    if (entry.isIntersecting) {
+      setTimeout(() => entry.target.classList.add('visible'), i * 80);
+      observer.unobserve(entry.target);
+    }
+  });
+}, { threshold: 0.1, rootMargin: '0px 0px -40px 0px' });
+
+document.querySelectorAll('.fade-target').forEach(el => observer.observe(el));
+</script>
+
 </body>
 </html>

@@ -134,7 +134,7 @@ ul{list-style:none}
 .portfolio{padding:4rem 0 6rem}
 .portfolio__grid{display:grid;grid-template-columns:1fr 1fr;gap:1.5rem}
 @media(max-width:768px){.portfolio__grid{grid-template-columns:1fr}}
-.portfolio-card{background:#0a0a0a;border-radius:var(--card);padding:2rem;min-height:22rem;display:flex;flex-direction:column;color:#fff;position:relative;overflow:hidden;transition:transform .35s var(--spring-snappy)}
+.portfolio-card{background:#0a0a0a;border-radius:var(--card);padding:2rem;min-height:22rem;display:flex;flex-direction:column;color:#fff;position:relative;overflow:hidden;transition:transform .35s var(--spring-snappy);cursor:pointer}
 @media(max-width:640px){.portfolio-card{min-height:18rem}}
 @media(hover:hover){.portfolio-card:hover{transform:scale(1.015)}}
 .portfolio-card__top{display:flex;justify-content:space-between;align-items:flex-start}
@@ -334,7 +334,7 @@ ul{list-style:none}
     <h2 class="section-title">Избранные проекты</h2>
     <div class="portfolio__grid">
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="https://alphcoder.github.io/realtime-collab/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">Real-time &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -345,9 +345,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">FastAPI</span><span class="portfolio-card__tag">WebSocket</span><span class="portfolio-card__tag">Redis</span><span class="portfolio-card__tag">React</span></div>
           <div class="portfolio-card__links"><a href="https://alphcoder.github.io/realtime-collab/" class="portfolio-card__link" target="_blank" rel="noopener">Демо</a><a href="https://github.com/alphcoder/realtime-collab" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="https://alphcoder.github.io/tenantkit/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">SaaS / Multi-tenant &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -358,9 +358,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">Next.js 15</span><span class="portfolio-card__tag">Prisma</span><span class="portfolio-card__tag">RBAC</span><span class="portfolio-card__tag">Stripe</span></div>
           <div class="portfolio-card__links"><a href="https://alphcoder.github.io/tenantkit/" class="portfolio-card__link" target="_blank" rel="noopener">Демо</a><a href="https://github.com/alphcoder/tenantkit" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="demo/ai-code-review/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">AI / DevTools &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -371,9 +371,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">FastAPI</span><span class="portfolio-card__tag">OpenAI</span><span class="portfolio-card__tag">GitHub API</span><span class="portfolio-card__tag">Docker</span></div>
           <div class="portfolio-card__links"><a href="demo/ai-code-review/" class="portfolio-card__link">Демо</a><a href="https://github.com/alphcoder/ai-code-review-bot" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="demo/ai-knowledge-hub/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">AI / RAG &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -384,9 +384,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">FastAPI</span><span class="portfolio-card__tag">ChromaDB</span><span class="portfolio-card__tag">OpenAI</span><span class="portfolio-card__tag">React</span></div>
           <div class="portfolio-card__links"><a href="demo/ai-knowledge-hub/" class="portfolio-card__link">Демо</a><a href="https://github.com/alphcoder/ai-knowledge-hub" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="demo/llm-gateway/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">AI / Backend &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -397,9 +397,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">FastAPI</span><span class="portfolio-card__tag">OpenAI</span><span class="portfolio-card__tag">Anthropic</span><span class="portfolio-card__tag">YandexGPT</span></div>
           <div class="portfolio-card__links"><a href="demo/llm-gateway/" class="portfolio-card__link">Демо</a><a href="https://github.com/alphcoder/llm-gateway" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="demo/sales-dashboard/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">Fullstack &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -410,9 +410,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">NestJS</span><span class="portfolio-card__tag">PostgreSQL</span><span class="portfolio-card__tag">Nuxt 3</span><span class="portfolio-card__tag">Chart.js</span></div>
           <div class="portfolio-card__links"><a href="demo/sales-dashboard/" class="portfolio-card__link">Демо</a><a href="https://github.com/alphcoder/sales-dashboard" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="demo/web-scraper/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">Backend / Data &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -423,9 +423,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">FastAPI</span><span class="portfolio-card__tag">Playwright</span><span class="portfolio-card__tag">MongoDB</span><span class="portfolio-card__tag">Celery</span></div>
           <div class="portfolio-card__links"><a href="demo/web-scraper/" class="portfolio-card__link">Демо</a><a href="https://github.com/alphcoder/web-scraper-pipeline" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="demo/business-kit/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">Fullstack / Integrations &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -436,9 +436,9 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">Next.js</span><span class="portfolio-card__tag">AmoCRM</span><span class="portfolio-card__tag">YooKassa</span><span class="portfolio-card__tag">Telegram</span></div>
           <div class="portfolio-card__links"><a href="demo/business-kit/" class="portfolio-card__link">Демо</a><a href="https://github.com/alphcoder/business-starter-kit" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
-      <div class="portfolio-card">
+      <a class="portfolio-card" href="https://alphcoder.github.io/starter-landing/" target="_blank" rel="noopener">
         <div class="portfolio-card__top">
           <span class="portfolio-card__meta">Frontend / Landing &mdash; 2025</span>
           <span class="portfolio-card__badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"/><polyline points="8 7 17 7 17 16"/></svg></span>
@@ -449,7 +449,7 @@ ul{list-style:none}
           <div class="portfolio-card__tags"><span class="portfolio-card__tag">HTML</span><span class="portfolio-card__tag">CSS</span><span class="portfolio-card__tag">SaaS</span><span class="portfolio-card__tag">Dark UI</span></div>
           <div class="portfolio-card__links"><a href="https://alphcoder.github.io/starter-landing/" class="portfolio-card__link" target="_blank" rel="noopener">Демо</a><a href="https://github.com/alphcoder/starter-landing" class="portfolio-card__link" target="_blank" rel="noopener">GitHub</a></div>
         </div>
-      </div>
+      </a>
 
     </div>
   </div>
